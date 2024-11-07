@@ -1,12 +1,12 @@
 # BattleJoker
 
-BattleJoker is a strategic card game where players compete against each other using a deck of unique cards with various abilities.
+BattleJoker is a strategic card game where players compete against each other using a deck of cards.
 
 ## Features
 
-- **Multiplayer Mode**: Play against friends or AI.
-- **Unique Cards**: Each card has distinct abilities and stats.
-- **Strategic Gameplay**: Plan your moves and outsmart your opponents.
+- **Multiplayer Mode**
+- **Unique Cards**
+- **Strategic Gameplay**
 
 ## Installation
 
@@ -18,26 +18,10 @@ BattleJoker is a strategic card game where players compete against each other us
     ```bash
     cd BattleJoker
     ```
-3. Install dependencies:
-    ```bash
-    npm install
-    ```
 
 ## Usage
 
 Start the game by running:
-```bash
-npm start
+
+JokerServer & BattleJoker classes.
 ```
-
-## Contributing
-
-Contributions are welcome! Please fork the repository and create a pull request.
-
-## License
-
-This project is licensed under the MIT License.
-
-## Contact
-
-For any inquiries, please contact [your email].
