@@ -36,11 +36,11 @@ public class JokerServer {
             ServerSocket srvSocket = new ServerSocket(port);
             while (true) {
                 Socket clientSocket = srvSocket.accept();
-//                Player player = new Player();
-//
-//                synchronized (playerList) {
-//                    playerList.add(clientSocket);
-//                }
+                Player player = new Player(clientSocket); // initiate a player instance, get the names after
+
+                synchronized (playerList) {
+                    playerList.add(player);
+                }
 
 
                 Thread t = new Thread(() -> {

@@ -7,13 +7,15 @@ public class Player {
     private int combo;
     private Socket socket;
 
-    public Player(String name, Socket socket) {
-        this.name = name;
+    public Player(Socket socket) {
         this.socket = socket;
     }
 
     public String getName() {
         return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getLevel() {
