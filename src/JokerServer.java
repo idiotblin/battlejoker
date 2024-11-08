@@ -1,15 +1,17 @@
+import javax.xml.crypto.Data;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class JokerServer {
     ArrayList<Player> playerList = new ArrayList<>();
+    ArrayList<Socket> gameList = new ArrayList<>();
+    TreeMap<Socket, ArrayList<InetAddress>> gamePlayers;
     public static final int SIZE = 4;
     final int[] board = new int[SIZE * SIZE];
     private int combo;
@@ -22,6 +24,7 @@ public class JokerServer {
     public static final int LIMIT = 14;
     private final int MAX_MOVE = 4;
     private String playerName;
+
     Random random = new Random(0);
 
     public JokerServer(int port) {
@@ -36,10 +39,18 @@ public class JokerServer {
             ServerSocket srvSocket = new ServerSocket(port);
             while (true) {
                 Socket clientSocket = srvSocket.accept();
-                Player player = new Player(clientSocket); // initiate a player instance, get the names after
+//                if (!gameList.contains(clientSocket)) {   not clientSocket, but the ip that Client sends from the form
+//                    gameList.add(clientSocket);
+//                    gamePlayers.put(clientSocket, new ArrayList<>());
+//                }
+//                gamePlayers.get(clientSocket).add(clientSocket.getInetAddress());
 
+                Player player = new Player(clientSocket); // initiate a player instance, get the names after
                 synchronized (playerList) {
                     playerList.add(player);
+                    if (playerList.size() == 4) {
+                        // start the game
+                    }
                 }
 
 
@@ -67,13 +78,18 @@ public class JokerServer {
         System.out.println(clientSocket.getInetAddress());
         System.out.println(clientSocket.getLocalPort());
 
+
         DataInputStream in = new DataInputStream(clientSocket.getInputStream());
         DataOutputStream _out = new DataOutputStream(clientSocket.getOutputStream());
         sendPuzzle(_out);
-
+        DataInputStream[] dis = new DataInputStream[gameList.size()];
         while (true) {
+            /*
+             for loop to iterate over dis (nuts)
+
+             */
             String playerName;
-            char dir= '0';
+            char dir = '0';
 
             char charToken = (char) in.read(); // reads one byte or char
 
@@ -138,10 +154,10 @@ public class JokerServer {
                 if (gameOver) {
                     try {
                         Database.putScore(playerName, score, level);
-                        for (Player p: playerList) {
+                        for (Player p : playerList) {
                             DataOutputStream _out = new DataOutputStream(p.getSocket().getOutputStream());
                             _out.write('S');
-                            Database.getScores().forEach(data->{
+                            Database.getScores().forEach(data -> {
                                 String scoreStr = String.format("%s (%s)", data.get("score"), data.get("level"));
                                 try {
                                     _out.write(String.format("%10s | %10s | %s", data.get("name"), scoreStr, data.get("time").substring(0, 16)).getBytes());

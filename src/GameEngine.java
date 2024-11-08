@@ -127,6 +127,7 @@ public class GameEngine {
      */
     public void moveMerge(String dir) throws IOException {
         System.out.println(dir);
+        out.write('D');
         out.write(dir.charAt(0));
         out.flush();
 
