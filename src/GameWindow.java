@@ -11,36 +11,41 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class GameWindow {
     @FXML
     MenuBar menuBar;
 
-    @FXML
-    Label nameLabel;
-
-    @FXML
-    Label scoreLabel;
-
-    @FXML
-    Label levelLabel;
-
-    @FXML
-    Label comboLabel;
-
-    @FXML
-    Label moveCountLabel;
+//    @FXML
+//    Label nameLabel;
+//
+//    @FXML
+//    Label scoreLabel;
+//
+//    @FXML
+//    Label levelLabel;
+//
+//    @FXML
+//    Label comboLabel;
+//
+//    @FXML
+//    Label moveCountLabel;
 
     @FXML
     Pane boardPane;
 
     @FXML
     Canvas canvas;
+
+    @FXML
+    VBox playerStats;
 
     Stage stage;
     AnimationTimer animationTimer;
@@ -118,10 +123,27 @@ public class GameWindow {
     }
 
     private void updatePlayerStats() {
-        scoreLabel.setText("Score: " + gameEngine.getScore());
-        levelLabel.setText("Level: " + gameEngine.getLevel());
-        comboLabel.setText("Combo: " + gameEngine.getCombo());
-        moveCountLabel.setText("# of Moves: " + gameEngine.getMoveCount());
+        playerStats.getChildren().clear(); // Clear existing labels
+        int numberOfPlayers = gameEngine.getNumOfPlayers();
+        ArrayList<String> playerNames = gameEngine.getPlayerNames();
+        ArrayList<Integer> scores = gameEngine.getScores();
+        ArrayList<Integer> combos = gameEngine.getCombos();
+        for (int i = 1; i <= numberOfPlayers; i++) {
+            Label nameLabel = new Label(playerNames.get(i));
+            Label scoreLabel = new Label("Score: " + scores.get(i));
+            Label levelLabel = new Label("Level: " + gameEngine.getLevel());
+            Label comboLabel = new Label("Combo: " + combos.get(i));
+            Label moveCountLabel = new Label("# of Moves: " + gameEngine.getMoveCount());
+
+            VBox playerVBox = new VBox(5); // Create a VBox for each player
+            playerVBox.getChildren().addAll(nameLabel, scoreLabel, levelLabel, comboLabel, moveCountLabel);
+
+            playerStats.getChildren().add(playerVBox); // Add player's VBox to the main VBox
+        }
+//        scoreLabel.setText("Score: " + gameEngine.getScore());
+//        levelLabel.setText("Level: " + gameEngine.getLevel());
+//        comboLabel.setText("Combo: " + gameEngine.getCombo());
+//        moveCountLabel.setText("# of Moves: " + gameEngine.getMoveCount());
     }
 
     private void render() {
@@ -180,8 +202,9 @@ public class GameWindow {
         System.exit(0);
     }
 
-    public void setName(String name) {
-        nameLabel.setText(name);
+    public void setName(String name) throws IOException {
+        gameEngine.addPlayerName(name);
+        gameEngine.sendPlayerName(name);
 //        gameEngine.setPlayerName(name);
     }
 }

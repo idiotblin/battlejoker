@@ -2,6 +2,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -21,12 +22,15 @@ public class GameEngine {
     private static GameEngine instance;
 //    private boolean gameOver;
 
-//    private String playerName;
+    private String playerName;
     private int level = 1;
     private int score;
     private int combo;
     private int totalMoveCount;
     private int numOfTilesMoved;
+    private ArrayList<Integer> scores;
+    private ArrayList<Integer> combos;
+    private ArrayList<String> playerNames;
 
 //    private final Map<String, Runnable> actionMap = new HashMap<>();
 
@@ -34,6 +38,10 @@ public class GameEngine {
         clientSocket = new Socket("127.0.0.1", 12345);
         in = new DataInputStream(clientSocket.getInputStream());
         out = new DataOutputStream(clientSocket.getOutputStream());
+
+        scores = new ArrayList<>();
+        combos = new ArrayList<>();
+        playerNames = new ArrayList<>();
         receiverThread = new Thread(()->{
             try {
                 while (true) {
@@ -69,11 +77,18 @@ public class GameEngine {
     }
 
     private void receiveScores(DataInputStream in) throws IOException {
-        level = in.readInt();
-        score = in.readInt();
-        combo = in.readInt();
-        totalMoveCount = in.readInt();
-        numOfTilesMoved = in.readInt();
+        int numOfPlayers = in.readInt();
+        for (int i = 0; i < numOfPlayers; i++) {
+            int nameLength = in.readInt();
+            byte[] nameBytes = new byte[nameLength];
+            in.read(nameBytes, 0, nameLength);
+            playerNames.set(i, new String(nameBytes));
+            level = in.readInt();
+            scores.set(i, in.readInt());
+            combos.set(i, in.readInt());
+            totalMoveCount = in.readInt();
+            numOfTilesMoved = in.readInt();
+        }
     }
 
     public void receiveArray(DataInputStream in) throws IOException {
@@ -121,6 +136,11 @@ public class GameEngine {
 //            if (v == 0) return false;
 //        return true;
 //    }
+    public void sendPlayerName(String name) throws IOException {
+        out.write('N');
+        out.write(name.length());
+        out.write(name.getBytes());
+    }
 
     /**
      * Move and combine the cards based on the input direction
@@ -239,16 +259,16 @@ public class GameEngine {
 //        return gameOver;
 //    }
 //
-//    public void setPlayerName(String name) {
-//        playerName = name;
-//    }
-//
-    public int getScore() {
-        return score;
+    public ArrayList<String> getPlayerNames() {
+        return playerNames;
     }
 
-    public int getCombo() {
-        return combo;
+    public ArrayList<Integer> getScores() {
+        return scores;
+    }
+
+    public ArrayList<Integer> getCombos() {
+        return combos;
     }
 
     public int getLevel() {
@@ -257,5 +277,13 @@ public class GameEngine {
 
     public int getMoveCount() {
         return totalMoveCount;
+    }
+
+    public int getNumOfPlayers(){
+        return playerNames.size();
+    }
+
+    public void addPlayerName(String name) {
+        playerNames.add(name);
     }
 }

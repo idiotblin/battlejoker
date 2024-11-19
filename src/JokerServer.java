@@ -78,7 +78,13 @@ public class JokerServer {
         System.out.println(clientSocket.getInetAddress());
         System.out.println(clientSocket.getLocalPort());
 
-
+        Player curPlayer = new Player(clientSocket);
+        for (Player player : playerList) {
+            if (player.getSocket().equals(clientSocket)) {
+                curPlayer = player;
+                break;
+            }
+        }
         DataInputStream in = new DataInputStream(clientSocket.getInputStream());
         DataOutputStream _out = new DataOutputStream(clientSocket.getOutputStream());
 
@@ -99,7 +105,10 @@ public class JokerServer {
 
             switch (charToken) {
                 case 'N':
-                    playerName = String.valueOf(in.read());
+                    int nameLength = in.readInt();
+                    byte[] nameBytes = new byte[nameLength];
+                    in.read(nameBytes, 0, nameLength);
+                    curPlayer.setName(new String(nameBytes));
                     break;
                 case 'D':
                     dir = (char) in.read();
@@ -108,7 +117,7 @@ public class JokerServer {
             }
 
             synchronized (playerList) {
-                moveMerge("" + dir);
+                moveMerge(curPlayer, "" + dir);
 
                 for (int i : board) {
                     System.out.print(i + " ");
@@ -131,12 +140,20 @@ public class JokerServer {
     public void sendPlayerStats(DataOutputStream out) throws IOException {
         // dog shit I know, probably use the Player class variables from our playerList
         out.write('S');
-        out.writeInt(level);
-        out.writeInt(score);
-        out.writeInt(combo);
-        out.writeInt(totalMoveCount);
-        out.writeInt(numOfTilesMoved);
-
+        int numOfPlayers = playerList.size();
+        out.writeInt(numOfPlayers);
+        for (Player player: playerList) {
+            String curPlayerName = "";
+            if (player.getName() != null)
+                curPlayerName = player.getName();
+            out.write(curPlayerName.length());
+            out.write(curPlayerName.getBytes());
+            out.writeInt(level);
+            out.writeInt(player.getScore());
+            out.writeInt(player.getCombo());
+            out.writeInt(totalMoveCount);
+            out.writeInt(numOfTilesMoved);
+        }
         out.flush();
     }
 
@@ -149,17 +166,17 @@ public class JokerServer {
         out.flush(); // force java to send out
     }   // need to send player name, score,
 
-    public void moveMerge(String dir) {
+    public void moveMerge(Player curPlayer, String dir) {
         synchronized (board) { //to give newly joined players the current map
             if (actionMap.containsKey(dir)) {
                 combo = numOfTilesMoved = 0;
-
+                curPlayer.setCombo(combo);
                 // go to the hash map, find the corresponding method and call it
                 actionMap.get(dir).run();
 
                 // calculate the new score
                 score += combo / 5 * 2;
-
+                curPlayer.setScore(score);
                 // determine whether the game is over or not
                 if (numOfTilesMoved > 0) {
                     totalMoveCount++;

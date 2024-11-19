@@ -20,6 +20,9 @@ public class Player {
         this.name = name;
     }
 
+    public boolean nameEmpty() {
+        return this.name.isEmpty();
+    }
     public int getLevel() {
         return level;
     }

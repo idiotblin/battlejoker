@@ -40,7 +40,7 @@ public class GetNameDialog {
     @FXML
     void OnButtonClick(Event event) {
         playername = nameField.getText().trim();
-        if (playername.length() > 0)
+        if (!playername.isEmpty())
             stage.close();
     }
 
