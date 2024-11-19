@@ -133,7 +133,7 @@ public class JokerServer {
     }   // need to send player name, score,
 
     public void moveMerge(String dir) {
-        synchronized (board) { // this should be on the server side --> to give newly joined players the current map
+        synchronized (board) { //to give newly joined players the current map
             if (actionMap.containsKey(dir)) {
                 combo = numOfTilesMoved = 0;
 

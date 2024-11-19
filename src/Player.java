@@ -6,6 +6,7 @@ public class Player {
     private int score;
     private int combo;
     private Socket socket;
+    private int totalMoveCount;
 
     public Player(Socket socket) {
         this.socket = socket;
@@ -45,5 +46,13 @@ public class Player {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public int getTotalMoveCount() {
+        return totalMoveCount;
+    }
+
+    public void setTotalMoveCount(int totalMoveCount) {
+        this.totalMoveCount = totalMoveCount;
     }
 }
