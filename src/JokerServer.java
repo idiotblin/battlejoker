@@ -81,7 +81,11 @@ public class JokerServer {
 
         DataInputStream in = new DataInputStream(clientSocket.getInputStream());
         DataOutputStream _out = new DataOutputStream(clientSocket.getOutputStream());
+
+        // when a new player joins
         sendPuzzle(_out);
+        sendPlayerStats(_out);
+
         DataInputStream[] dis = new DataInputStream[gameList.size()];
         while (true) {
             /*
@@ -117,10 +121,23 @@ public class JokerServer {
                     out.write(dir);
                     out.flush();
 
+                    sendPlayerStats(out);
                     sendPuzzle(out);
                 }
             }
         }
+    }
+
+    public void sendPlayerStats(DataOutputStream out) throws IOException {
+        // dog shit I know, probably use the Player class variables from our playerList
+        out.write('S');
+        out.writeInt(level);
+        out.writeInt(score);
+        out.writeInt(combo);
+        out.writeInt(totalMoveCount);
+        out.writeInt(numOfTilesMoved);
+
+        out.flush();
     }
 
     public void sendPuzzle(DataOutputStream out) throws IOException {

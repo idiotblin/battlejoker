@@ -92,10 +92,10 @@ public class GameWindow {
                 e.printStackTrace(); // debugging
                 System.exit(-1); // give a dialogue box about network problem rather than just exit
             }
-//            scoreLabel.setText("Score: " + gameEngine.getScore());
-//            levelLabel.setText("Level: " + gameEngine.getLevel());
-//            comboLabel.setText("Combo: " + gameEngine.getCombo());
-//            moveCountLabel.setText("# of Moves: " + gameEngine.getMoveCount());
+            scoreLabel.setText("Score: " + gameEngine.getScore());
+            levelLabel.setText("Level: " + gameEngine.getLevel());
+            comboLabel.setText("Combo: " + gameEngine.getCombo());
+            moveCountLabel.setText("# of Moves: " + gameEngine.getMoveCount());
         });
 
         animationTimer = new AnimationTimer() {
