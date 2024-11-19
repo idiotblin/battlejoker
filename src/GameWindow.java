@@ -92,10 +92,7 @@ public class GameWindow {
                 e.printStackTrace(); // debugging
                 System.exit(-1); // give a dialogue box about network problem rather than just exit
             }
-//            scoreLabel.setText("Score: " + gameEngine.getScore());
-//            levelLabel.setText("Level: " + gameEngine.getLevel());
-//            comboLabel.setText("Combo: " + gameEngine.getCombo());
-//            moveCountLabel.setText("# of Moves: " + gameEngine.getMoveCount());
+            updatePlayerStats();
         });
 
         animationTimer = new AnimationTimer() {
@@ -118,6 +115,13 @@ public class GameWindow {
             }
         };
         canvas.requestFocus();
+    }
+
+    private void updatePlayerStats() {
+        scoreLabel.setText("Score: " + gameEngine.getScore());
+        levelLabel.setText("Level: " + gameEngine.getLevel());
+        comboLabel.setText("Combo: " + gameEngine.getCombo());
+        moveCountLabel.setText("# of Moves: " + gameEngine.getMoveCount());
     }
 
     private void render() {
@@ -153,6 +157,7 @@ public class GameWindow {
             }
             y += blockSize;
         }
+        updatePlayerStats();
     }
 
     void onWidthChangedWindow(double w) {

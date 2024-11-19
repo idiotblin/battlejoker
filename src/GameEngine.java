@@ -22,11 +22,11 @@ public class GameEngine {
 //    private boolean gameOver;
 
 //    private String playerName;
-//    private int level = 1;
-//    private int score;
-//    private int combo;
-//    private int totalMoveCount;
-//    private int numOfTilesMoved;
+    private int level = 1;
+    private int score;
+    private int combo;
+    private int totalMoveCount;
+    private int numOfTilesMoved;
 
 //    private final Map<String, Runnable> actionMap = new HashMap<>();
 
@@ -69,10 +69,11 @@ public class GameEngine {
     }
 
     private void receiveScores(DataInputStream in) throws IOException {
-        int size = in.readChar();
-        for (int i = 0; i < size; i++) {
-            board[i] = in.readChar();
-        }
+        level = in.readInt();
+        score = in.readInt();
+        combo = in.readInt();
+        totalMoveCount = in.readInt();
+        numOfTilesMoved = in.readInt();
     }
 
     public void receiveArray(DataInputStream in) throws IOException {
@@ -242,19 +243,19 @@ public class GameEngine {
 //        playerName = name;
 //    }
 //
-//    public int getScore() {
-//        return score;
-//    }
-//
-//    public int getCombo() {
-//        return combo;
-//    }
-//
-//    public int getLevel() {
-//        return level;
-//    }
-//
-//    public int getMoveCount() {
-//        return totalMoveCount;
-//    }
+    public int getScore() {
+        return score;
+    }
+
+    public int getCombo() {
+        return combo;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public int getMoveCount() {
+        return totalMoveCount;
+    }
 }
