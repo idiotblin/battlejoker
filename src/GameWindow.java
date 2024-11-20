@@ -186,7 +186,17 @@ public class GameWindow {
     }
 
     public void setName(String name) throws IOException {
-        gameEngine.sendPlayerName(name); // to the server
+        gameEngine.sendPlayerName(name);
+        // send ip address and port to gameEngine
+    }
+
+    public void setIp(String ip) throws IOException {
+        gameEngine.setIp(ip);
+        // send ip address and port to gameEngine
+    }
+
+    public void setPort(String port) throws IOException {
+        gameEngine.setPort(port);
         // send ip address and port to gameEngine
     }
 }

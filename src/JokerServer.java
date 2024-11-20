@@ -6,6 +6,7 @@ import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.*;
 
 public class JokerServer {
@@ -27,12 +28,11 @@ public class JokerServer {
 
     Random random = new Random(0);
 
-    public JokerServer(int port) {
+    public JokerServer(int port) throws UnknownHostException {
         actionMap.put("U", this::moveUp);
         actionMap.put("D", this::moveDown);
         actionMap.put("L", this::moveLeft);
         actionMap.put("R", this::moveRight);
-
         nextRound();
 
         try {
