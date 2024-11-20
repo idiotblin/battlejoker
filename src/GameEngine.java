@@ -93,7 +93,6 @@ public class GameEngine {
     private void updatePlayerList(DataInputStream in, String ipAddress) throws IOException {
         Player player = new Player(ipAddress);
 
-        // name
         int nameLength = in.readInt();
         byte[] nameBytes = new byte[nameLength];
         in.read(nameBytes, 0, nameLength);
@@ -108,19 +107,19 @@ public class GameEngine {
         int tempCombo = in.readInt();
         player.setCombo(tempCombo);
 
-        int tempTotalMoveCount = in.readInt();
-        player.setTotalMoveCount(tempTotalMoveCount);
+        totalMoveCount = in.readInt();
+
         if (playerList.isEmpty() || (!playerListContains(ipAddress))) {
             playerList.add(player);
         } else {
-            playerList.get(getPlayerIndex(ipAddress)).setTotalMoveCount(tempTotalMoveCount);
+            playerList.set(getPlayerIndex(ipAddress), player);
         }
     }
 
     private int getPlayerIndex(String ipAddress) {
         int index = -1;
         for (int i = 0; i < playerList.size(); i++) {
-            if (playerList.get(i).equals(ipAddress))
+            if (playerList.get(i).getIpAddress().equals(ipAddress))
                 index = i;
         }
         return index;

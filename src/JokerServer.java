@@ -95,14 +95,10 @@ public class JokerServer {
         DataInputStream in = new DataInputStream(clientSocket.getInputStream());
         DataOutputStream _out = new DataOutputStream(clientSocket.getOutputStream());
 
-        // when a new player joins
         sendPuzzle(_out);
         sendPlayerStats(_out);
 
-//        DataInputStream[] dis = new DataInputStream[gameList.size()];
-
-        // read name
-        char nameToken = (char) in.read(); // first thing they send is their name
+        char nameToken = (char) in.read();
         if (nameToken == 'N') {
             int nameLength = in.readInt();
             byte[] nameBytes = new byte[nameLength];
@@ -115,10 +111,10 @@ public class JokerServer {
              for loop to iterate over dis (nuts)
 
              */
-//            String playerName;
+
             char dir = '0';
 
-            char charToken = (char) in.read(); // reads one byte or char
+            char charToken = (char) in.read();
 
             switch (charToken) {
                 case 'D':
@@ -196,7 +192,6 @@ public class JokerServer {
             out.writeInt(player.getScore());
             out.writeInt(player.getCombo());
             out.writeInt(totalMoveCount);
-//            out.writeInt(numOfTilesMoved);
         }
         out.flush();
     }
