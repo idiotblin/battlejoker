@@ -24,21 +24,6 @@ public class GameWindow {
     @FXML
     MenuBar menuBar;
 
-//    @FXML
-//    Label nameLabel;
-//
-//    @FXML
-//    Label scoreLabel;
-//
-//    @FXML
-//    Label levelLabel;
-//
-//    @FXML
-//    Label comboLabel;
-//
-//    @FXML
-//    Label moveCountLabel;
-
     @FXML
     Pane boardPane;
 
@@ -201,7 +186,6 @@ public class GameWindow {
     }
 
     public void setName(String name) throws IOException {
-        gameEngine.setCurPlayerName(name);
         gameEngine.sendPlayerName(name); // to the server
         // send ip address and port to gameEngine
     }

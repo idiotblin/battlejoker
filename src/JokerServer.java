@@ -39,18 +39,13 @@ public class JokerServer {
             ServerSocket srvSocket = new ServerSocket(port);
             while (true) {
                 Socket clientSocket = srvSocket.accept();
-//                if (!gameList.contains(clientSocket)) {   not clientSocket, but the ip that Client sends from the form
-//                    gameList.add(clientSocket);
-//                    gamePlayers.put(clientSocket, new ArrayList<>());
-//                }
-//                gamePlayers.get(clientSocket).add(clientSocket.getInetAddress());
 
-                if(!clientList.contains(clientSocket)) {
+                if (!clientList.contains(clientSocket)) {
                     synchronized (clientList) {
                         clientList.add(clientSocket);
                     }
                     synchronized (playerList) {
-                        playerList.add(new Player(clientSocket.getInetAddress().getHostAddress())); // initiate player
+                        playerList.add(new Player(clientSocket.getInetAddress().toString())); // initiate player
 
                         if (playerList.size() == 4) {
                             // start the game
@@ -159,7 +154,7 @@ public class JokerServer {
     private int getCurrentPlayerIndex(Socket clientSocket) {
         int index = 0;
         for (int i = 0; i < playerList.size(); i++) {
-            if (playerList.get(i).getIpAddress().equals(clientSocket.getInetAddress().getHostAddress())) {
+            if (playerList.get(i).getIpAddress().equals(clientSocket.getInetAddress().toString())) {
                 index = i;
             }
         }
@@ -173,7 +168,7 @@ public class JokerServer {
         int numOfPlayers = playerList.size();
         out.writeInt(numOfPlayers);
 
-        for (Player player: playerList) {
+        for (Player player : playerList) {
             String curPlayerIpAddress = "";
             if (player.getIpAddress() != null)
                 curPlayerIpAddress = player.getIpAddress();
@@ -185,7 +180,7 @@ public class JokerServer {
             out.writeInt(curPlayerIpAddress.length());
             out.write(curPlayerIpAddress.getBytes());
 
-            out.write(curPlayerName.length());
+            out.writeInt(curPlayerName.length());
             out.write(curPlayerName.getBytes());
 
             out.writeInt(level);
