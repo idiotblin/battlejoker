@@ -24,7 +24,6 @@ public class JokerServer {
     private int totalMoveCount;
     public static final int LIMIT = 14;
     private final int MAX_MOVE = 4;
-    private String playerName;
 
     Random random = new Random(0);
 
@@ -322,35 +321,8 @@ public class JokerServer {
         }
     }
 
-    public int getValue(int r, int c) {
-        synchronized (board) {
-            return board[r * SIZE + c];
-        }
-
-    }
-
     public boolean isGameOver() {
         return gameOver;
-    }
-
-    public void setPlayerName(String name) {
-        playerName = name;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public int getCombo() {
-        return combo;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public int getMoveCount() {
-        return totalMoveCount;
     }
 
     public static void main(String[] args) throws IOException {

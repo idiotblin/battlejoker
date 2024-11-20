@@ -41,9 +41,9 @@ public class GameWindow {
     final Image[] images = new Image[symbols.length];
     static GameEngine gameEngine;
 
-    public GameWindow(Stage stage) throws IOException { // will be passed Ip and Port too
+    public GameWindow(Stage stage, String ip, String port) throws IOException {
         loadImages();
-        gameEngine = GameEngine.getInstance(); // pass Ip and Port
+        gameEngine = GameEngine.getInstance(ip, port);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainUI.fxml"));
         loader.setController(this);
         Parent root = loader.load();
@@ -190,13 +190,13 @@ public class GameWindow {
         // send ip address and port to gameEngine
     }
 
-    public void setIp(String ip) throws IOException {
-        gameEngine.setIp(ip);
-        // send ip address and port to gameEngine
-    }
-
-    public void setPort(String port) throws IOException {
-        gameEngine.setPort(port);
-        // send ip address and port to gameEngine
-    }
+//    public void setIp(String ip) throws IOException {
+//        gameEngine.setIp(ip);
+//        // send ip address and port to gameEngine
+//    }
+//
+//    public void setPort(String port) throws IOException {
+//        gameEngine.setPort(port);
+//        // send ip address and port to gameEngine
+//    }
 }

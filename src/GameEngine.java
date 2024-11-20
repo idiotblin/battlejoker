@@ -19,10 +19,8 @@ public class GameEngine {
 
     private int totalMoveCount;
 
-    private String ip;
-    private String port;
 
-    private GameEngine() throws IOException { // will be passed ip and Port
+    private GameEngine(String ip, String port) throws IOException { // will be passed ip and Port
         clientSocket = new Socket(ip, Integer.parseInt(port)); // connect using Ip and Port
         in = new DataInputStream(clientSocket.getInputStream());
         out = new DataOutputStream(clientSocket.getOutputStream());
@@ -123,10 +121,10 @@ public class GameEngine {
         }
     }
 
-    public static GameEngine getInstance() { // will be passed Ip and Port
+    public static GameEngine getInstance(String ip, String port) { // will be passed Ip and Port
         if (instance == null) {
             try {
-                instance = new GameEngine(); // pass Ip and port
+                instance = new GameEngine(ip, port); // pass Ip and port
             } catch (IOException e) {
                 e.printStackTrace(); //remove from final program, just exit
                 System.exit(-1);
@@ -140,14 +138,14 @@ public class GameEngine {
         out.writeInt(name.length());
         out.write(name.getBytes());
     }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public void setPort(String port) {
-        this.port = port;
-    }
+//
+//    public void setIp(String ip) {
+//        this.ip = ip;
+//    }
+//
+//    public void setPort(String port) {
+//        this.port = port;
+//    }
     /**
      * Move and combine the cards based on the input direction
      * @param dir
