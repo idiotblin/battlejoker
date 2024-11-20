@@ -90,7 +90,7 @@ public class JokerServer {
         System.out.println(clientSocket.getInetAddress());
         System.out.println(clientSocket.getLocalPort());
 
-        Player curPlayer = new Player(clientSocket.getInetAddress().getHostAddress());
+        Player curPlayer = new Player(clientSocket.getInetAddress().toString());
 
         DataInputStream in = new DataInputStream(clientSocket.getInputStream());
         DataOutputStream _out = new DataOutputStream(clientSocket.getOutputStream());
@@ -153,7 +153,7 @@ public class JokerServer {
     private Player getCurrentPlayer(Socket clientSocket) {
         Player target = new Player("");
         for (Player p : playerList) {
-            if (p.getIpAddress().equals(clientSocket.getInetAddress().getHostAddress())) {
+            if (p.getIpAddress().equals(clientSocket.getInetAddress().toString())) {
                 target = p;
             }
         }

@@ -34,17 +34,15 @@ public class GameEngine {
 
 //    private final Map<String, Runnable> actionMap = new HashMap<>();
 
-    private GameEngine() throws IOException {
-        clientSocket = new Socket("127.0.0.1", 12345);
+    private GameEngine() throws IOException { // will be passed ip and Port
+        clientSocket = new Socket("127.0.0.1", 12345); // connect using Ip and Port
         in = new DataInputStream(clientSocket.getInputStream());
         out = new DataOutputStream(clientSocket.getOutputStream());
 
         curPlayer = new Player(InetAddress.getLocalHost().getHostAddress());
+        // if playerList.size() < 4: ... else do not allow
         playerList.add(curPlayer);
 
-//        scores = new ArrayList<>();
-//        combos = new ArrayList<>();
-//        playerNames = new ArrayList<>();
         receiverThread = new Thread(()->{
             try {
                 while (true) {
@@ -88,17 +86,11 @@ public class GameEngine {
             in.read(ipBytes, 0, ipLength);
             String ipAddress = new String(ipBytes);
 
-            if (playerList.isEmpty() || (!playerListContains(ipAddress))) {
-                // add player
-                addPlayer(in, ipAddress);
-            } else {
-                // update player
-                updatePlayer(in, ipAddress);
-            }
+            updatePlayerList(in, ipAddress);
         }
     }
 
-    private void addPlayer(DataInputStream in, String ipAddress) throws IOException {
+    private void updatePlayerList(DataInputStream in, String ipAddress) throws IOException {
         Player player = new Player(ipAddress);
 
         // name
@@ -118,27 +110,11 @@ public class GameEngine {
 
         int tempTotalMoveCount = in.readInt();
         player.setTotalMoveCount(tempTotalMoveCount);
-    }
-
-    private void updatePlayer(DataInputStream in, String ipAddress) throws IOException {
-        int playerIndex = getPlayerIndex(ipAddress); // locate player to update
-
-        int nameLength = in.readInt();
-        byte[] nameBytes = new byte[nameLength];
-        in.read(nameBytes, 0, nameLength);
-        playerList.get(playerIndex).setName(new String(nameBytes));
-
-        int tempLevel = in.readInt();
-        playerList.get(playerIndex).setLevel(tempLevel);
-
-        int tempScore = in.readInt();
-        playerList.get(playerIndex).setScore(tempScore);
-
-        int tempCombo = in.readInt();
-        playerList.get(playerIndex).setCombo(tempCombo);
-
-        int tempTotalMoveCount = in.readInt();
-        playerList.get(playerIndex).setTotalMoveCount(tempTotalMoveCount);
+        if (playerList.isEmpty() || (!playerListContains(ipAddress))) {
+            playerList.add(player);
+        } else {
+            playerList.get(getPlayerIndex(ipAddress)).setTotalMoveCount(tempTotalMoveCount);
+        }
     }
 
     private int getPlayerIndex(String ipAddress) {
@@ -165,10 +141,10 @@ public class GameEngine {
         }
     }
 
-    public static GameEngine getInstance() {
+    public static GameEngine getInstance() { // will be passed Ip and Port
         if (instance == null) {
             try {
-                instance = new GameEngine();
+                instance = new GameEngine(); // pass Ip and port
             } catch (IOException e) {
                 e.printStackTrace(); //remove from final program, just exit
                 System.exit(-1);

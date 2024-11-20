@@ -54,11 +54,11 @@ public class GameWindow {
     final String imagePath = "images/";
     final String[] symbols = {"bg", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "Joker"};
     final Image[] images = new Image[symbols.length];
-    final GameEngine gameEngine = GameEngine.getInstance();
+    static GameEngine gameEngine;
 
-    public GameWindow(Stage stage) throws IOException {
+    public GameWindow(Stage stage) throws IOException { // will be passed Ip and Port too
         loadImages();
-
+        gameEngine = GameEngine.getInstance(); // pass Ip and Port
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainUI.fxml"));
         loader.setController(this);
         Parent root = loader.load();
@@ -202,8 +202,7 @@ public class GameWindow {
 
     public void setName(String name) throws IOException {
         gameEngine.setCurPlayerName(name);
-//        gameEngine.addPlayerName(name);
-        gameEngine.sendPlayerName(name);
-//        gameEngine.setPlayerName(name);
+        gameEngine.sendPlayerName(name); // to the server
+        // send ip address and port to gameEngine
     }
 }

@@ -40,7 +40,8 @@ public class GetNameDialog {
     @FXML
     void OnButtonClick(Event event) {
         playername = nameField.getText().trim();
-        if (!playername.isEmpty())
+        // add ip and port
+        if (!playername.isEmpty()) // AND ip !isEmpty AND port !isEmpty
             stage.close();
     }
 

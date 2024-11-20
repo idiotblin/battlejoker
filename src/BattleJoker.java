@@ -10,14 +10,11 @@ public class BattleJoker extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-       // Socket clientSocket;
-
         try {
             GetNameDialog dialog = new GetNameDialog();
-            GameWindow win = new GameWindow(primaryStage);
+            GameWindow win = new GameWindow(primaryStage); // should pass dialog.getIp and dialog.getPort
             win.setName(dialog.getPlayername());
             Database.connect();
-          //  clientSocket = new Socket("127.0.0.1", 12345); // user will provide the IP and port number from a new prompt
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
