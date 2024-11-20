@@ -1,13 +1,13 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 
 public class GameEngine {
+    Player curPlayer;
+    ArrayList<Player> playerList = new ArrayList<>();
     Thread receiverThread; // for receiving data sent from the server
 
     Socket clientSocket;
@@ -28,9 +28,9 @@ public class GameEngine {
     private int combo;
     private int totalMoveCount;
     private int numOfTilesMoved;
-    private ArrayList<Integer> scores;
-    private ArrayList<Integer> combos;
-    private ArrayList<String> playerNames;
+//    private ArrayList<Integer> scores;
+//    private ArrayList<Integer> combos;
+//    private ArrayList<String> playerNames;
 
 //    private final Map<String, Runnable> actionMap = new HashMap<>();
 
@@ -39,9 +39,12 @@ public class GameEngine {
         in = new DataInputStream(clientSocket.getInputStream());
         out = new DataOutputStream(clientSocket.getOutputStream());
 
-        scores = new ArrayList<>();
-        combos = new ArrayList<>();
-        playerNames = new ArrayList<>();
+        curPlayer = new Player(InetAddress.getLocalHost().getHostAddress());
+        playerList.add(curPlayer);
+
+//        scores = new ArrayList<>();
+//        combos = new ArrayList<>();
+//        playerNames = new ArrayList<>();
         receiverThread = new Thread(()->{
             try {
                 while (true) {
@@ -53,7 +56,7 @@ public class GameEngine {
                             receiveArray(in);
                             break;
                         case 'S':
-                            receiveScores(in);
+                            receivePlayerStats(in);
                             break;
                         default:
                             System.out.println(data);
@@ -76,19 +79,83 @@ public class GameEngine {
 //        nextRound();
     }
 
-    private void receiveScores(DataInputStream in) throws IOException {
-        int numOfPlayers = in.readInt();
+    private void receivePlayerStats(DataInputStream in) throws IOException {
+        int numOfPlayers = in.readInt(); // check players, if exists update, if absent add
         for (int i = 0; i < numOfPlayers; i++) {
-            int nameLength = in.readInt();
-            byte[] nameBytes = new byte[nameLength];
-            in.read(nameBytes, 0, nameLength);
-            playerNames.set(i, new String(nameBytes));
-            level = in.readInt();
-            scores.set(i, in.readInt());
-            combos.set(i, in.readInt());
-            totalMoveCount = in.readInt();
-            numOfTilesMoved = in.readInt();
+
+            int ipLength = in.readInt();
+            byte[] ipBytes = new byte[ipLength];
+            in.read(ipBytes, 0, ipLength);
+            String ipAddress = new String(ipBytes);
+
+            if (playerList.isEmpty() || (!playerListContains(ipAddress))) {
+                // add player
+                addPlayer(in, ipAddress);
+            } else {
+                // update player
+                updatePlayer(in, ipAddress);
+            }
         }
+    }
+
+    private void addPlayer(DataInputStream in, String ipAddress) throws IOException {
+        Player player = new Player(ipAddress);
+
+        // name
+        int nameLength = in.readInt();
+        byte[] nameBytes = new byte[nameLength];
+        in.read(nameBytes, 0, nameLength);
+        player.setName(new String(nameBytes));
+
+        int tempLevel = in.readInt();
+        player.setLevel(tempLevel);
+
+        int tempScore = in.readInt();
+        player.setScore(tempScore);
+
+        int tempCombo = in.readInt();
+        player.setCombo(tempCombo);
+
+        int tempTotalMoveCount = in.readInt();
+        player.setTotalMoveCount(tempTotalMoveCount);
+    }
+
+    private void updatePlayer(DataInputStream in, String ipAddress) throws IOException {
+        int playerIndex = getPlayerIndex(ipAddress); // locate player to update
+
+        int nameLength = in.readInt();
+        byte[] nameBytes = new byte[nameLength];
+        in.read(nameBytes, 0, nameLength);
+        playerList.get(playerIndex).setName(new String(nameBytes));
+
+        int tempLevel = in.readInt();
+        playerList.get(playerIndex).setLevel(tempLevel);
+
+        int tempScore = in.readInt();
+        playerList.get(playerIndex).setScore(tempScore);
+
+        int tempCombo = in.readInt();
+        playerList.get(playerIndex).setCombo(tempCombo);
+
+        int tempTotalMoveCount = in.readInt();
+        playerList.get(playerIndex).setTotalMoveCount(tempTotalMoveCount);
+    }
+
+    private int getPlayerIndex(String ipAddress) {
+        int index = -1;
+        for (int i = 0; i < playerList.size(); i++) {
+            if (playerList.get(i).equals(ipAddress))
+                index = i;
+        }
+        return index;
+    }
+
+    private boolean playerListContains(String ipAddress) {
+        for (Player p : playerList)
+            if (p.getIpAddress().equals(ipAddress))
+                return true;
+
+        return false;
     }
 
     public void receiveArray(DataInputStream in) throws IOException {
@@ -259,17 +326,17 @@ public class GameEngine {
 //        return gameOver;
 //    }
 //
-    public ArrayList<String> getPlayerNames() {
-        return playerNames;
-    }
-
-    public ArrayList<Integer> getScores() {
-        return scores;
-    }
-
-    public ArrayList<Integer> getCombos() {
-        return combos;
-    }
+//    public ArrayList<String> getPlayerNames() {
+//        return playerNames;
+//    }
+//
+//    public ArrayList<Integer> getScores() {
+//        return scores;
+//    }
+//
+//    public ArrayList<Integer> getCombos() {
+//        return combos;
+//    }
 
     public int getLevel() {
         return level;
@@ -280,10 +347,14 @@ public class GameEngine {
     }
 
     public int getNumOfPlayers(){
-        return playerNames.size();
+        return playerList.size();
     }
+//
+//    public void addPlayerName(String name) {
+//        playerNames.add(name);
+//    }
 
-    public void addPlayerName(String name) {
-        playerNames.add(name);
+    public void setCurPlayerName(String name) {
+        curPlayer.setName(name);
     }
 }

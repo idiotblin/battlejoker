@@ -10,7 +10,7 @@ import java.util.*;
 
 public class JokerServer {
     ArrayList<Player> playerList = new ArrayList<>();
-    ArrayList<Socket> gameList = new ArrayList<>();
+    ArrayList<Socket> clientList = new ArrayList<>();
     TreeMap<Socket, ArrayList<InetAddress>> gamePlayers;
     public static final int SIZE = 4;
     final int[] board = new int[SIZE * SIZE];
@@ -45,15 +45,24 @@ public class JokerServer {
 //                }
 //                gamePlayers.get(clientSocket).add(clientSocket.getInetAddress());
 
-                Player player = new Player(clientSocket); // initiate a player instance, get the names after
-                synchronized (playerList) {
-                    playerList.add(player);
-                    if (playerList.size() == 4) {
-                        // start the game
+                if(!clientList.contains(clientSocket)) {
+                    synchronized (clientList) {
+                        clientList.add(clientSocket);
+                    }
+                    synchronized (playerList) {
+                        playerList.add(new Player(clientSocket.getInetAddress().getHostAddress())); // initiate player
+
+                        if (playerList.size() == 4) {
+                            // start the game
+                        }
                     }
                 }
 
-
+//                Player player = new Player(clientSocket); // initiate a player instance, get the names after
+//                synchronized (playerList) {
+//                    playerList.add(player);
+//
+//                }
                 Thread t = new Thread(() -> {
                     try {
                         serve(clientSocket);
@@ -61,8 +70,11 @@ public class JokerServer {
                         e.printStackTrace(); // debugging
                         System.out.println("The client is disconnected! "
                                 + clientSocket.getInetAddress().toString());
+                        synchronized (clientList) {
+                            clientList.remove(clientSocket);
+                        }
                         synchronized (playerList) {
-                            playerList.remove(clientSocket);
+                            playerList.remove(getCurrentPlayer(clientSocket));
                         }
                     }
                 });
@@ -78,13 +90,8 @@ public class JokerServer {
         System.out.println(clientSocket.getInetAddress());
         System.out.println(clientSocket.getLocalPort());
 
-        Player curPlayer = new Player(clientSocket);
-        for (Player player : playerList) {
-            if (player.getSocket().equals(clientSocket)) {
-                curPlayer = player;
-                break;
-            }
-        }
+        Player curPlayer = new Player(clientSocket.getInetAddress().getHostAddress());
+
         DataInputStream in = new DataInputStream(clientSocket.getInputStream());
         DataOutputStream _out = new DataOutputStream(clientSocket.getOutputStream());
 
@@ -92,24 +99,28 @@ public class JokerServer {
         sendPuzzle(_out);
         sendPlayerStats(_out);
 
-        DataInputStream[] dis = new DataInputStream[gameList.size()];
-        while (true) {
+//        DataInputStream[] dis = new DataInputStream[gameList.size()];
+
+        // read name
+        char nameToken = (char) in.read(); // first thing they send is their name
+        if (nameToken == 'N') {
+            int nameLength = in.readInt();
+            byte[] nameBytes = new byte[nameLength];
+            in.read(nameBytes, 0, nameLength);
+            curPlayer.setName(new String(nameBytes));
+        }
+        System.out.println("User: " + curPlayer.getName() + " connected!");
+        while (true) { // repeated listen for their moves
             /*
              for loop to iterate over dis (nuts)
 
              */
-            String playerName;
+//            String playerName;
             char dir = '0';
 
             char charToken = (char) in.read(); // reads one byte or char
 
             switch (charToken) {
-                case 'N':
-                    int nameLength = in.readInt();
-                    byte[] nameBytes = new byte[nameLength];
-                    in.read(nameBytes, 0, nameLength);
-                    curPlayer.setName(new String(nameBytes));
-                    break;
                 case 'D':
                     dir = (char) in.read();
                 default:
@@ -119,40 +130,73 @@ public class JokerServer {
             synchronized (playerList) {
                 moveMerge(curPlayer, "" + dir);
 
+                playerList.set(getCurrentPlayerIndex(clientSocket), curPlayer);
+
                 for (int i : board) {
                     System.out.print(i + " ");
                 }
 
 //              gameOver = !nextRound();
 
-                for (Player p : playerList) {
-                    DataOutputStream out = new DataOutputStream(p.getSocket().getOutputStream());
+                for (Socket s : clientList) {
+                    DataOutputStream out = new DataOutputStream(s.getOutputStream());
                     out.write(dir);
                     out.flush();
 
-                    sendPlayerStats(out);
                     sendPuzzle(out);
+                    sendPlayerStats(out);
                 }
             }
         }
     }
 
+    private Player getCurrentPlayer(Socket clientSocket) {
+        Player target = new Player("");
+        for (Player p : playerList) {
+            if (p.getIpAddress().equals(clientSocket.getInetAddress().getHostAddress())) {
+                target = p;
+            }
+        }
+        return target;
+    }
+
+    private int getCurrentPlayerIndex(Socket clientSocket) {
+        int index = 0;
+        for (int i = 0; i < playerList.size(); i++) {
+            if (playerList.get(i).getIpAddress().equals(clientSocket.getInetAddress().getHostAddress())) {
+                index = i;
+            }
+        }
+        return index;
+    }
+
     public void sendPlayerStats(DataOutputStream out) throws IOException {
         // dog shit I know, probably use the Player class variables from our playerList
         out.write('S');
+
         int numOfPlayers = playerList.size();
         out.writeInt(numOfPlayers);
+
         for (Player player: playerList) {
+            String curPlayerIpAddress = "";
+            if (player.getIpAddress() != null)
+                curPlayerIpAddress = player.getIpAddress();
+
             String curPlayerName = "";
             if (player.getName() != null)
                 curPlayerName = player.getName();
+
+            out.writeInt(curPlayerIpAddress.length());
+            out.write(curPlayerIpAddress.getBytes());
+
             out.write(curPlayerName.length());
             out.write(curPlayerName.getBytes());
+
             out.writeInt(level);
             out.writeInt(player.getScore());
             out.writeInt(player.getCombo());
             out.writeInt(totalMoveCount);
-            out.writeInt(numOfTilesMoved);
+//            out.writeInt(numOfTilesMoved);
         }
         out.flush();
     }
@@ -185,26 +229,26 @@ public class JokerServer {
                     gameOver = isFull();
 
 
-                if (gameOver) {
-                    try {
-                        Database.putScore(playerName, score, level);
-                        for (Player p : playerList) {
-                            DataOutputStream _out = new DataOutputStream(p.getSocket().getOutputStream());
-                            _out.write('S');
-                            Database.getScores().forEach(data -> {
-                                String scoreStr = String.format("%s (%s)", data.get("score"), data.get("level"));
-                                try {
-                                    _out.write(String.format("%10s | %10s | %s", data.get("name"), scoreStr, data.get("time").substring(0, 16)).getBytes());
-                                } catch (IOException e) {
-                                    System.out.println("MISTAKE WHEN SENDING SCORES, player name: " + playerName);
-                                    System.out.println(e.getMessage());
-                                }
-                            });
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
+//                if (gameOver) {
+//                    try {
+//                        Database.putScore(playerName, score, level);
+//                        for (Player p : playerList) {
+//                            DataOutputStream _out = new DataOutputStream(p.getSocket().getOutputStream());
+//                            _out.write('S');
+//                            Database.getScores().forEach(data -> {
+//                                String scoreStr = String.format("%s (%s)", data.get("score"), data.get("level"));
+//                                try {
+//                                    _out.write(String.format("%10s | %10s | %s", data.get("name"), scoreStr, data.get("time").substring(0, 16)).getBytes());
+//                                } catch (IOException e) {
+//                                    System.out.println("MISTAKE WHEN SENDING SCORES, player name: " + playerName);
+//                                    System.out.println(e.getMessage());
+//                                }
+//                            });
+//                        }
+//                    } catch (Exception ex) {
+//                        ex.printStackTrace();
+//                    }
+//                }
             }
         }
     }

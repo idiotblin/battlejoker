@@ -10,6 +10,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -125,25 +126,22 @@ public class GameWindow {
     private void updatePlayerStats() {
         playerStats.getChildren().clear(); // Clear existing labels
         int numberOfPlayers = gameEngine.getNumOfPlayers();
-        ArrayList<String> playerNames = gameEngine.getPlayerNames();
-        ArrayList<Integer> scores = gameEngine.getScores();
-        ArrayList<Integer> combos = gameEngine.getCombos();
-        for (int i = 1; i <= numberOfPlayers; i++) {
-            Label nameLabel = new Label(playerNames.get(i));
-            Label scoreLabel = new Label("Score: " + scores.get(i));
-            Label levelLabel = new Label("Level: " + gameEngine.getLevel());
-            Label comboLabel = new Label("Combo: " + combos.get(i));
+
+        HBox playerHBox = new HBox(10); // Create an HBox to contain player VBoxes
+        for (int i = 0; i < numberOfPlayers; i++) {
+            Label nameLabel = new Label(gameEngine.playerList.get(i).getName());
+            Label scoreLabel = new Label("Score: " + gameEngine.playerList.get(i).getScore());
+            Label levelLabel = new Label("Level: " + gameEngine.playerList.get(i).getLevel());
+            Label comboLabel = new Label("Combo: " + gameEngine.playerList.get(i).getCombo());
             Label moveCountLabel = new Label("# of Moves: " + gameEngine.getMoveCount());
 
             VBox playerVBox = new VBox(5); // Create a VBox for each player
             playerVBox.getChildren().addAll(nameLabel, scoreLabel, levelLabel, comboLabel, moveCountLabel);
 
-            playerStats.getChildren().add(playerVBox); // Add player's VBox to the main VBox
+            playerHBox.getChildren().add(playerVBox); // Add player's VBox to the HBox
         }
-//        scoreLabel.setText("Score: " + gameEngine.getScore());
-//        levelLabel.setText("Level: " + gameEngine.getLevel());
-//        comboLabel.setText("Combo: " + gameEngine.getCombo());
-//        moveCountLabel.setText("# of Moves: " + gameEngine.getMoveCount());
+
+        playerStats.getChildren().add(playerHBox); // Add the HBox to the main VBox
     }
 
     private void render() {
@@ -203,7 +201,8 @@ public class GameWindow {
     }
 
     public void setName(String name) throws IOException {
-        gameEngine.addPlayerName(name);
+        gameEngine.setCurPlayerName(name);
+//        gameEngine.addPlayerName(name);
         gameEngine.sendPlayerName(name);
 //        gameEngine.setPlayerName(name);
     }
