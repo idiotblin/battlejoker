@@ -15,10 +15,10 @@ public class JokerServer {
     TreeMap<Socket, ArrayList<InetAddress>> gamePlayers;
     public static final int SIZE = 4;
     final int[] board = new int[SIZE * SIZE];
-    private int combo;
     private final Map<String, Runnable> actionMap = new HashMap<>();
     private int numOfTilesMoved;
     private int level = 1;
+    private int combo;
     private int score;
     private boolean gameOver;
     private int totalMoveCount;
@@ -203,13 +203,14 @@ public class JokerServer {
         synchronized (board) { //to give newly joined players the current map
             if (actionMap.containsKey(dir)) {
                 combo = numOfTilesMoved = 0;
-                curPlayer.setCombo(combo);
+                score = curPlayer.getScore();
                 // go to the hash map, find the corresponding method and call it
                 actionMap.get(dir).run();
 
                 // calculate the new score
-                score += combo / 5 * 2;
-                curPlayer.setScore(score);
+                curPlayer.setCombo(combo);
+                curPlayer.setScore(score + combo / 5 * 2);
+
                 // determine whether the game is over or not
                 if (numOfTilesMoved > 0) {
                     totalMoveCount++;
