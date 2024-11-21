@@ -20,6 +20,8 @@ public class GameEngine {
     private boolean gameOver = false;
     private ArrayList<String> scoreBoard = new ArrayList<>();
 
+    private int turn;
+
     private GameEngine(String ip, String port) throws IOException { // will be passed ip and Port
         clientSocket = new Socket(ip, Integer.parseInt(port)); // connect using Ip and Port
         in = new DataInputStream(clientSocket.getInputStream());
@@ -36,7 +38,7 @@ public class GameEngine {
                     System.out.println(data);
 
                     switch(data) {
-                        case 'A': // server sent an array, can add more stuff here like a score or username so can catch them here
+                        case 'A':
                             receiveArray(in);
                             break;
                         case 'S':
@@ -45,6 +47,8 @@ public class GameEngine {
                         case 'G':
                             gameOver = true;
                             receiveScoreBoard(in);
+                            break;
+                        case 'T':
                             break;
                         default:
                             System.out.println(data);
@@ -81,6 +85,10 @@ public class GameEngine {
         }
     }
 
+    private void receiveTurn(DataInputStream in) throws IOException {
+        this.turn = in.readInt();
+    }
+
     private void updatePlayerList(DataInputStream in, String ipAddress) throws IOException {
         Player player = new Player(ipAddress);
 
@@ -106,7 +114,6 @@ public class GameEngine {
             playerList.set(getPlayerIndex(ipAddress), player);
         }
     }
-
     private int getPlayerIndex(String ipAddress) {
         int index = -1;
         for (int i = 0; i < playerList.size(); i++) {
@@ -184,5 +191,9 @@ public class GameEngine {
 
     public ArrayList<String> getScoreBoard() {
         return scoreBoard;
+    }
+
+    public String getTurnName() {
+        return playerList.get(turn).getName();
     }
 }

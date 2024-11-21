@@ -13,6 +13,8 @@ import java.util.*;
 public class JokerServer {
     ArrayList<Player> playerList = new ArrayList<>();
     ArrayList<Socket> clientList = new ArrayList<>();
+    HashMap<Integer, Integer> gameTurn = new HashMap<>();
+    HashMap<Integer, Integer> playerMove = new HashMap<>();
     public static final int SIZE = 4;
     final int[] board = new int[SIZE * SIZE];
     private final Map<String, Runnable> actionMap = new HashMap<>();
@@ -45,14 +47,19 @@ public class JokerServer {
                 Socket clientSocket = srvSocket.accept();
 
                 if (!clientList.contains(clientSocket)) {
+                    if (playerList.isEmpty()) {
+                        gameTurn.put(0, 0);
+                    } else if (playerList.size() % 4 == 0) {
+                        continue;
+                    }
                     synchronized (clientList) {
                         clientList.add(clientSocket);
                     }
                     synchronized (playerList) {
                         playerList.add(new Player(clientSocket.getInetAddress().toString())); // initiate player
-
-                        if (playerList.size() == 4) {
-                            // start the game
+                        playerMove.put(playerList.size() - 1, 0);
+                        if (playerList.size() % 4 == 0) { // start the game automatically
+                            gameTurn.put(playerList.size() / 4, 0);
                         }
                     }
                 }
@@ -124,10 +131,19 @@ public class JokerServer {
             }
 
             synchronized (playerList) {
+                int ind = getCurrentPlayerIndex(clientSocket);
+                if (!gameTurn.containsKey(ind / 4) && gameTurn.get(ind / 4) != ind % 4){
+                    continue;
+                }
+
                 moveMerge(curPlayer, "" + dir);
+                playerList.set(ind, curPlayer);
 
-                playerList.set(getCurrentPlayerIndex(clientSocket), curPlayer);
-
+                playerMove.put(ind, playerMove.get(ind) + 1);
+                if (playerMove.get(ind) == 4) {
+                    playerMove.put(ind, 0);
+                    gameTurn.put(ind / 4, (gameTurn.get(ind / 4) + 1) % 4);
+                }
                 for (int i : board) {
                     System.out.print(i + " ");
                 }
@@ -140,6 +156,7 @@ public class JokerServer {
 
                     sendPuzzle(out);
                     sendPlayerStats(out);
+                    sendTurn(out, getCurrentPlayerIndex(s));
                 }
             }
         }
@@ -203,10 +220,16 @@ public class JokerServer {
         out.flush(); // force java to send out
     }   // need to send player name, score,
 
+    public void sendTurn(DataOutputStream out, int ind) throws IOException {
+        out.write('T');
+        out.writeInt(gameTurn.get(ind / 4));
+        out.flush();
+    }
+
     private ArrayList<HashMap<String, String>> winner() throws SQLException {
         int max = -1;
         Player ans = null;
-        for (Player player: playerList) {
+        for (Player player : playerList) {
             if (player.getScore() > max) {
                 max = player.getScore();
                 ans = player;

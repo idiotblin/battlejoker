@@ -25,6 +25,7 @@
 
         </VBox>
     </HBox>
+    <Label fx:id="turnLabel"/>
     <BorderPane fx:id="boardPane">
         <center>
             <Pane style="-fx-background-color: #a88;" BorderPane.alignment="CENTER">

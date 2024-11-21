@@ -33,6 +33,9 @@ public class GameWindow {
     @FXML
     VBox playerStats;
 
+    @FXML
+    Label turnLabel;
+
     Stage stage;
     AnimationTimer animationTimer;
 
@@ -126,6 +129,7 @@ public class GameWindow {
         }
 
         playerStats.getChildren().add(playerHBox); // Add the HBox to the main VBox
+        turnLabel.setText(String.format("Player %s's turn!", gameEngine.getTurnName()));
     }
 
     private void render() {
