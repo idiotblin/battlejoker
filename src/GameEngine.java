@@ -16,9 +16,9 @@ public class GameEngine {
 
     public static final int SIZE = 4;
     final int[] board = new int[SIZE * SIZE];
-
     private int totalMoveCount;
-
+    private boolean gameOver = false;
+    private ArrayList<String> scoreBoard = new ArrayList<>();
 
     private GameEngine(String ip, String port) throws IOException { // will be passed ip and Port
         clientSocket = new Socket(ip, Integer.parseInt(port)); // connect using Ip and Port
@@ -42,6 +42,10 @@ public class GameEngine {
                         case 'S':
                             receivePlayerStats(in);
                             break;
+                        case 'G':
+                            gameOver = true;
+                            receiveScoreBoard(in);
+                            break;
                         default:
                             System.out.println(data);
                     }
@@ -54,10 +58,20 @@ public class GameEngine {
 
     }
 
+    private void receiveScoreBoard(DataInputStream in) throws IOException {
+        int numOfScores = in.readInt();
+        for (int i = 0; i < numOfScores; i++) {
+            int recLength = in.readInt();
+            byte[] recBytes = new byte[recLength];
+            in.read(recBytes, 0, recLength);
+            String record = new String(recBytes);
+            scoreBoard.add(record);
+        }
+    }
+
     private void receivePlayerStats(DataInputStream in) throws IOException {
         int numOfPlayers = in.readInt(); // check players, if exists update, if absent add
         for (int i = 0; i < numOfPlayers; i++) {
-
             int ipLength = in.readInt();
             byte[] ipBytes = new byte[ipLength];
             in.read(ipBytes, 0, ipLength);
@@ -138,14 +152,7 @@ public class GameEngine {
         out.writeInt(name.length());
         out.write(name.getBytes());
     }
-//
-//    public void setIp(String ip) {
-//        this.ip = ip;
-//    }
-//
-//    public void setPort(String port) {
-//        this.port = port;
-//    }
+
     /**
      * Move and combine the cards based on the input direction
      * @param dir
@@ -155,7 +162,6 @@ public class GameEngine {
         out.write('D');
         out.write(dir.charAt(0));
         out.flush();
-
     }
 
     public int getValue(int r, int c) {
@@ -172,4 +178,11 @@ public class GameEngine {
         return playerList.size();
     }
 
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public ArrayList<String> getScoreBoard() {
+        return scoreBoard;
+    }
 }

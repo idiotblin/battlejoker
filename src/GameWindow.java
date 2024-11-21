@@ -90,19 +90,18 @@ public class GameWindow {
             @Override
             public void handle(long now) {
                 render();
-//                if (gameEngine.isGameOver()) {
-//                    System.out.println("Game Over!");
-//                    animationTimer.stop();
-//
-//                    Platform.runLater(() -> {
-//                        try {
-//                            new ScoreboardWindow();
-//                        } catch (IOException ex) {
-//                            throw new RuntimeException(ex);
-//                        }
-//                    });
-//
-//                }
+                if (gameEngine.isGameOver()) {
+                    System.out.println("Game Over!");
+                    animationTimer.stop();
+                    Platform.runLater(() -> {
+                        try {
+                            new ScoreboardWindow(gameEngine.getScoreBoard());
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
+
+                }
             }
         };
         canvas.requestFocus();
@@ -130,7 +129,6 @@ public class GameWindow {
     }
 
     private void render() {
-
         double w = canvas.getWidth();
         double h = canvas.getHeight();
 

@@ -7,12 +7,12 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.*;
 
 public class JokerServer {
     ArrayList<Player> playerList = new ArrayList<>();
     ArrayList<Socket> clientList = new ArrayList<>();
-    TreeMap<Socket, ArrayList<InetAddress>> gamePlayers;
     public static final int SIZE = 4;
     final int[] board = new int[SIZE * SIZE];
     private final Map<String, Runnable> actionMap = new HashMap<>();
@@ -52,11 +52,6 @@ public class JokerServer {
                     }
                 }
 
-//                Player player = new Player(clientSocket); // initiate a player instance, get the names after
-//                synchronized (playerList) {
-//                    playerList.add(player);
-//
-//                }
                 Thread t = new Thread(() -> {
                     try {
                         serve(clientSocket);
@@ -100,14 +95,17 @@ public class JokerServer {
             curPlayer.setName(new String(nameBytes));
         }
         System.out.println("User: " + curPlayer.getName() + " connected!");
-        while (true) { // repeated listen for their moves
-            /*
-             for loop to iterate over dis (nuts)
 
-             */
-
+        while (true) {
+            if (gameOver) {
+                try {
+                    sendGameOver();
+                    continue;
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
             char dir = '0';
-
             char charToken = (char) in.read();
 
             switch (charToken) {
@@ -125,7 +123,6 @@ public class JokerServer {
                 for (int i : board) {
                     System.out.print(i + " ");
                 }
-
 //              gameOver = !nextRound();
 
                 for (Socket s : clientList) {
@@ -161,7 +158,6 @@ public class JokerServer {
     }
 
     public void sendPlayerStats(DataOutputStream out) throws IOException {
-        // dog shit I know, probably use the Player class variables from our playerList
         out.write('S');
 
         int numOfPlayers = playerList.size();
@@ -199,6 +195,40 @@ public class JokerServer {
         out.flush(); // force java to send out
     }   // need to send player name, score,
 
+    private ArrayList<HashMap<String, String>> winner() throws SQLException {
+        int max = -1;
+        Player ans = null;
+        for (Player player: playerList) {
+            if (player.getScore() > max) {
+                max = player.getScore();
+                ans = player;
+            }
+        }
+        Database.putScore(ans.getName(), ans.getScore(), ans.getLevel());
+        return Database.getPlayer(ans.getName(), ans.getScore(), ans.getLevel());
+    }
+
+    public void sendGameOver() throws IOException, SQLException {
+        ArrayList<HashMap<String, String>> scores = winner();
+        scores.addAll(Database.getScores());
+        for (Socket client : clientList) {
+            DataOutputStream out = new DataOutputStream(client.getOutputStream());
+            out.write('G');
+            out.writeInt(scores.size());
+            scores.forEach(data -> {
+                String scoreStr = String.format("%s (%s)", data.get("score"), data.get("level"));
+                try {
+                    String sendString = String.format("%10s | %10s | %s", data.get("name"), scoreStr, data.get("time").substring(0, 16));
+                    out.writeInt(sendString.length());
+                    out.write(sendString.getBytes());
+                } catch (IOException e) {
+                    System.out.println("MISTAKE WHEN SENDING SCORES, player name: " + playerList.get(getCurrentPlayerIndex(client)).getName());
+                    System.out.println(e.getMessage());
+                }
+            });
+        }
+    }
+
     public void moveMerge(Player curPlayer, String dir) {
         synchronized (board) { //to give newly joined players the current map
             if (actionMap.containsKey(dir)) {
@@ -217,28 +247,6 @@ public class JokerServer {
                     gameOver = level == LIMIT || !nextRound();
                 } else
                     gameOver = isFull();
-
-
-//                if (gameOver) {
-//                    try {
-//                        Database.putScore(playerName, score, level);
-//                        for (Player p : playerList) {
-//                            DataOutputStream _out = new DataOutputStream(p.getSocket().getOutputStream());
-//                            _out.write('S');
-//                            Database.getScores().forEach(data -> {
-//                                String scoreStr = String.format("%s (%s)", data.get("score"), data.get("level"));
-//                                try {
-//                                    _out.write(String.format("%10s | %10s | %s", data.get("name"), scoreStr, data.get("time").substring(0, 16)).getBytes());
-//                                } catch (IOException e) {
-//                                    System.out.println("MISTAKE WHEN SENDING SCORES, player name: " + playerName);
-//                                    System.out.println(e.getMessage());
-//                                }
-//                            });
-//                        }
-//                    } catch (Exception ex) {
-//                        ex.printStackTrace();
-//                    }
-//                }
             }
         }
     }
@@ -324,7 +332,7 @@ public class JokerServer {
 
     public boolean isGameOver() {
         return gameOver;
-    }
+    } // get status of game with this :id
 
     public static void main(String[] args) throws IOException {
         new JokerServer(12345);

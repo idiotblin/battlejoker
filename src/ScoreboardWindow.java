@@ -4,12 +4,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class ScoreboardWindow {
     Stage stage;
@@ -17,7 +19,15 @@ public class ScoreboardWindow {
     @FXML
     ListView<String> scoreList;
 
-    public ScoreboardWindow() throws IOException {
+    @FXML
+    private Button showAllScores;
+
+    @FXML
+    private Button showTheWinner;
+
+    private static ArrayList<String> scores;
+
+    public ScoreboardWindow(ArrayList<String> scoreBoard) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("scoreUI.fxml"));
         loader.setController(this);
         Parent root = loader.load();
@@ -30,7 +40,7 @@ public class ScoreboardWindow {
         stage.setMinHeight(scene.getHeight());
 
         setFont(14);
-        updateList();
+        updateList(scoreBoard);
 
         stage.showAndWait();
     }
@@ -50,16 +60,28 @@ public class ScoreboardWindow {
         });
     }
 
-    private void updateList() {
+    private void updateList(ArrayList<String> scoreBoard) {
         try {
             ObservableList<String> items = FXCollections.observableArrayList();
-            Database.getScores().forEach(data->{
-                String scoreStr = String.format("%s (%s)", data.get("score"), data.get("level"));
-                items.add(String.format("%10s | %10s | %s", data.get("name"), scoreStr, data.get("time").substring(0, 16)));
-            });
+            scores.addAll(scoreBoard);
+            ArrayList<String> display = new ArrayList<>();
+            items.addAll(scoreBoard);
             scoreList.setItems(items);
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    @FXML
+    private void handleButton1Click() {
+        showAllScores.setVisible(false);
+        showTheWinner.setVisible(true);
+
+    }
+
+    @FXML
+    private void handleButton2Click() {
+        showAllScores.setVisible(false);
+        showTheWinner.setVisible(true);
     }
 }
