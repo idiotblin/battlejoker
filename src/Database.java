@@ -10,6 +10,7 @@ public class Database {
         if (conn == null) {
 //            Class.forName("org.sqlite.JDBC");
             conn = DriverManager.getConnection(url);
+
         }
 
     }

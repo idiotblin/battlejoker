@@ -24,7 +24,7 @@ public class JokerServer {
     private int totalMoveCount;
     public static final int LIMIT = 14;
     private final int MAX_MOVE = 4;
-
+    private boolean sentEndGame = false;
     Random random = new Random(0);
 
     public JokerServer(int port) throws UnknownHostException {
@@ -104,7 +104,10 @@ public class JokerServer {
         while (true) {
             if (gameOver) {
                 try {
-                    sendGameOver();
+                    if (!sentEndGame) {
+                        sendGameOver();
+                        sentEndGame = true;
+                    }
                     continue;
                 } catch (Exception ex) {
                     ex.printStackTrace();

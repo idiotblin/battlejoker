@@ -7,9 +7,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
+import javafx.event.Event;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -20,12 +22,12 @@ public class ScoreboardWindow {
     ListView<String> scoreList;
 
     @FXML
-    private Button showAllScores;
+    Button showAllScores;
 
     @FXML
-    private Button showTheWinner;
+    Button showTheWinner;
 
-    private static ArrayList<String> scores;
+    private static ArrayList<String> scores = new ArrayList<>();
 
     public ScoreboardWindow(ArrayList<String> scoreBoard) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("scoreUI.fxml"));
@@ -46,7 +48,27 @@ public class ScoreboardWindow {
         display.add(scores.get(0));
         updateList(display);
 
+        showAllScores.setOnMouseClicked(this::handleButton1Click);
+        showTheWinner.setOnMouseClicked(this::handleButton2Click);
         stage.showAndWait();
+    }
+
+    @FXML
+    void handleButton1Click(Event event) {
+        showAllScores.setVisible(false);
+        showTheWinner.setVisible(true);
+        ArrayList<String> display = new ArrayList<>(scores);
+        display.remove(0);
+        updateList(display);
+    }
+
+    @FXML
+    private void handleButton2Click(Event event) {
+        showAllScores.setVisible(false);
+        showTheWinner.setVisible(true);
+        ArrayList<String> display = new ArrayList<>();
+        display.add(scores.get(0));
+        updateList(display);
     }
 
     private void setFont(int fontSize) {
@@ -72,23 +94,5 @@ public class ScoreboardWindow {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    }
-
-    @FXML
-    private void handleButton1Click() {
-        showAllScores.setVisible(false);
-        showTheWinner.setVisible(true);
-        ArrayList<String> display = new ArrayList<>(scores);
-        display.remove(0);
-        updateList(display);
-    }
-
-    @FXML
-    private void handleButton2Click() {
-        showAllScores.setVisible(false);
-        showTheWinner.setVisible(true);
-        ArrayList<String> display = new ArrayList<>();
-        display.add(scores.get(0));
-        updateList(display);
     }
 }
