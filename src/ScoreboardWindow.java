@@ -40,7 +40,11 @@ public class ScoreboardWindow {
         stage.setMinHeight(scene.getHeight());
 
         setFont(14);
-        updateList(scoreBoard);
+
+        scores.addAll(scoreBoard);
+        ArrayList<String> display = new ArrayList<>();
+        display.add(scores.get(0));
+        updateList(display);
 
         stage.showAndWait();
     }
@@ -63,8 +67,6 @@ public class ScoreboardWindow {
     private void updateList(ArrayList<String> scoreBoard) {
         try {
             ObservableList<String> items = FXCollections.observableArrayList();
-            scores.addAll(scoreBoard);
-            ArrayList<String> display = new ArrayList<>();
             items.addAll(scoreBoard);
             scoreList.setItems(items);
         } catch (Exception ex) {
@@ -76,12 +78,17 @@ public class ScoreboardWindow {
     private void handleButton1Click() {
         showAllScores.setVisible(false);
         showTheWinner.setVisible(true);
-
+        ArrayList<String> display = new ArrayList<>(scores);
+        display.remove(0);
+        updateList(display);
     }
 
     @FXML
     private void handleButton2Click() {
         showAllScores.setVisible(false);
         showTheWinner.setVisible(true);
+        ArrayList<String> display = new ArrayList<>();
+        display.add(scores.get(0));
+        updateList(display);
     }
 }

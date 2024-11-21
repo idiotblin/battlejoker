@@ -35,6 +35,11 @@ public class JokerServer {
         nextRound();
 
         try {
+            Database.connect();
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        try {
             ServerSocket srvSocket = new ServerSocket(port);
             while (true) {
                 Socket clientSocket = srvSocket.accept();
