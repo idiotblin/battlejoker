@@ -2,14 +2,14 @@ import java.net.Socket;
 
 public class Player {
     private String name;
+    private String ipAddress;
     private int level = 1;
-    private int score;
-    private int combo;
-    private Socket socket;
-    private int totalMoveCount;
+    private int score = 0;
+    private int combo = 0;
+    private int totalMoveCount = 0;
 
-    public Player(Socket socket) {
-        this.socket = socket;
+    public Player(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 
     public String getName() {
@@ -20,6 +20,9 @@ public class Player {
         this.name = name;
     }
 
+    public boolean nameEmpty() {
+        return this.name.isEmpty();
+    }
     public int getLevel() {
         return level;
     }
@@ -44,8 +47,8 @@ public class Player {
         this.combo = combo;
     }
 
-    public Socket getSocket() {
-        return socket;
+    public String getIpAddress() {
+        return ipAddress;
     }
 
     public int getTotalMoveCount() {

@@ -10,31 +10,19 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class GameWindow {
     @FXML
     MenuBar menuBar;
-
-    @FXML
-    Label nameLabel;
-
-    @FXML
-    Label scoreLabel;
-
-    @FXML
-    Label levelLabel;
-
-    @FXML
-    Label comboLabel;
-
-    @FXML
-    Label moveCountLabel;
 
     @FXML
     Pane boardPane;
@@ -42,17 +30,20 @@ public class GameWindow {
     @FXML
     Canvas canvas;
 
+    @FXML
+    VBox playerStats;
+
     Stage stage;
     AnimationTimer animationTimer;
 
     final String imagePath = "images/";
     final String[] symbols = {"bg", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "Joker"};
     final Image[] images = new Image[symbols.length];
-    final GameEngine gameEngine = GameEngine.getInstance();
+    static GameEngine gameEngine;
 
-    public GameWindow(Stage stage) throws IOException {
+    public GameWindow(Stage stage, String ip, String port) throws IOException {
         loadImages();
-
+        gameEngine = GameEngine.getInstance(ip, port);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainUI.fxml"));
         loader.setController(this);
         Parent root = loader.load();
@@ -99,33 +90,45 @@ public class GameWindow {
             @Override
             public void handle(long now) {
                 render();
-//                if (gameEngine.isGameOver()) {
-//                    System.out.println("Game Over!");
-//                    animationTimer.stop();
-//
-//                    Platform.runLater(() -> {
-//                        try {
-//                            new ScoreboardWindow();
-//                        } catch (IOException ex) {
-//                            throw new RuntimeException(ex);
-//                        }
-//                    });
-//
-//                }
+                if (gameEngine.isGameOver()) {
+                    System.out.println("Game Over!");
+                    animationTimer.stop();
+                    Platform.runLater(() -> {
+                        try {
+                            new ScoreboardWindow(gameEngine.getScoreBoard());
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
+
+                }
             }
         };
         canvas.requestFocus();
     }
 
     private void updatePlayerStats() {
-        scoreLabel.setText("Score: " + gameEngine.getScore());
-        levelLabel.setText("Level: " + gameEngine.getLevel());
-        comboLabel.setText("Combo: " + gameEngine.getCombo());
-        moveCountLabel.setText("# of Moves: " + gameEngine.getMoveCount());
+        playerStats.getChildren().clear(); // Clear existing labels
+        int numberOfPlayers = gameEngine.getNumOfPlayers();
+
+        HBox playerHBox = new HBox(10); // Create an HBox to contain player VBoxes
+        for (int i = 0; i < numberOfPlayers; i++) {
+            Label nameLabel = new Label(gameEngine.playerList.get(i).getName());
+            Label scoreLabel = new Label("Score: " + gameEngine.playerList.get(i).getScore());
+            Label levelLabel = new Label("Level: " + gameEngine.playerList.get(i).getLevel());
+            Label comboLabel = new Label("Combo: " + gameEngine.playerList.get(i).getCombo());
+            Label moveCountLabel = new Label("# of Moves: " + gameEngine.getMoveCount());
+
+            VBox playerVBox = new VBox(5); // Create a VBox for each player
+            playerVBox.getChildren().addAll(nameLabel, scoreLabel, levelLabel, comboLabel, moveCountLabel);
+
+            playerHBox.getChildren().add(playerVBox); // Add player's VBox to the HBox
+        }
+
+        playerStats.getChildren().add(playerHBox); // Add the HBox to the main VBox
     }
 
     private void render() {
-
         double w = canvas.getWidth();
         double h = canvas.getHeight();
 
@@ -180,8 +183,18 @@ public class GameWindow {
         System.exit(0);
     }
 
-    public void setName(String name) {
-        nameLabel.setText(name);
-//        gameEngine.setPlayerName(name);
+    public void setName(String name) throws IOException {
+        gameEngine.sendPlayerName(name);
+        // send ip address and port to gameEngine
     }
+
+//    public void setIp(String ip) throws IOException {
+//        gameEngine.setIp(ip);
+//        // send ip address and port to gameEngine
+//    }
+//
+//    public void setPort(String port) throws IOException {
+//        gameEngine.setPort(port);
+//        // send ip address and port to gameEngine
+//    }
 }

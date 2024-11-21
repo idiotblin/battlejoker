@@ -10,6 +10,7 @@ public class Database {
         if (conn == null) {
 //            Class.forName("org.sqlite.JDBC");
             conn = DriverManager.getConnection(url);
+
         }
 
     }
@@ -30,6 +31,24 @@ public class Database {
             m.put("score", resultSet.getString("score"));
             m.put("level", resultSet.getString("level"));
             m.put("time", resultSet.getString("time"));
+//              m.put("gameId", resultSet.getString("time"));
+            data.add(m);
+        }
+        return data;
+    }
+
+    public static ArrayList<HashMap<String, String>> getPlayer(String name, int score, int level) throws SQLException {
+        String sql = String.format("SELECT * FROM scores WHERE name='%s' AND score=%d AND level=%d", name, score, level);
+        ArrayList<HashMap<String, String>> data = new ArrayList<>();
+        Statement statement = conn.createStatement();
+        ResultSet resultSet = statement.executeQuery(sql);
+        while (resultSet.next()) {
+            HashMap<String, String> m = new HashMap<>();
+            m.put("name", resultSet.getString("name"));
+            m.put("score", resultSet.getString("score"));
+            m.put("level", resultSet.getString("level"));
+            m.put("time", resultSet.getString("time"));
+//              m.put("gameId", resultSet.getString("time"));
             data.add(m);
         }
         return data;

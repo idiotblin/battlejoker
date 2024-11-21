@@ -15,10 +15,18 @@ public class GetNameDialog {
     TextField nameField;
 
     @FXML
+    TextField ipField;
+
+    @FXML
+    TextField portField;
+
+    @FXML
     Button goButton;
 
     Stage stage;
     String playername;
+    String ip;
+    String port;
 
     public GetNameDialog() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("getNameUI.fxml"));
@@ -40,11 +48,23 @@ public class GetNameDialog {
     @FXML
     void OnButtonClick(Event event) {
         playername = nameField.getText().trim();
-        if (playername.length() > 0)
+        ip = ipField.getText().trim();
+        port = portField.getText().trim();
+
+        // add ip and port
+        if (!playername.isEmpty() && !ip.isEmpty() && !port.isEmpty()) // AND ip !isEmpty AND port !isEmpty
             stage.close();
     }
 
-    public String getPlayername() {
+    public String getPlayerName() {
         return playername;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public String getPort() {
+        return port;
     }
 }
