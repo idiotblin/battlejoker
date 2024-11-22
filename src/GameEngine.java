@@ -21,6 +21,8 @@ public class GameEngine {
     private ArrayList<String> scoreBoard = new ArrayList<>();
 
     private int turn = -1;
+    private boolean isInGame;
+    private int posInQueue;
 
     private GameEngine(String ip, String port) throws IOException { // will be passed ip and Port
         clientSocket = new Socket(ip, Integer.parseInt(port)); // connect using Ip and Port
@@ -45,11 +47,17 @@ public class GameEngine {
                             receivePlayerStats(in);
                             break;
                         case 'G':
-                            gameOver = true;
+                            this.gameOver = true;
                             receiveScoreBoard(in);
                             break;
                         case 'T':
-                            receiveTurn(in); // you didn't add cause its cooked?
+                            this.turn = in.readInt();
+                            break;
+                        case 'N':
+                            this.isInGame = in.readBoolean();
+                            if (!this.isInGame) {
+                                this.posInQueue = in.readInt();
+                            }
                             break;
                         default:
                             System.out.println(data);
@@ -86,10 +94,6 @@ public class GameEngine {
         }
     }
 
-    private void receiveTurn(DataInputStream in) throws IOException {
-        this.turn = in.readInt();
-    }
-
     private void updatePlayerList(DataInputStream in, String ipAddress) throws IOException {
         Player player = new Player(ipAddress);
 
@@ -115,6 +119,7 @@ public class GameEngine {
             playerList.set(getPlayerIndex(ipAddress), player);
         }
     }
+
     private int getPlayerIndex(String ipAddress) {
         int index = -1;
         for (int i = 0; i < playerList.size(); i++) {
@@ -198,5 +203,13 @@ public class GameEngine {
         if (turn == -1)
             return null;
         return playerList.get(turn).getName();
+    }
+
+    public boolean isInGame() {
+        return isInGame;
+    }
+
+    public int getPosInQueue() {
+        return posInQueue;
     }
 }

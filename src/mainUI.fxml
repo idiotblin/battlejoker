@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.Button?>
 <VBox prefHeight="894.0" prefWidth="748.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
         <Menu mnemonicParsing="false" text="Game">
@@ -24,6 +25,9 @@
         </VBox>
     </HBox>
     <Label fx:id="turnLabel" />
+    <Label fx:id="watching" text="You are watching the current game."/>
+    <Label fx:id="queueLabel"/>
+    <Button fx:id="leave" text="Leave"/>
     <BorderPane fx:id="boardPane">
         <center>
             <Pane style="-fx-background-color: #a88;" BorderPane.alignment="CENTER">
