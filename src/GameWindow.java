@@ -13,6 +13,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -117,6 +118,8 @@ public class GameWindow {
         HBox playerHBox = new HBox(10); // Create an HBox to contain player VBoxes
         for (int i = 0; i < numberOfPlayers; i++) {
             Label nameLabel = new Label(gameEngine.playerList.get(i).getName());
+            nameLabel.setFont(Font.font("Impact", 30));
+
             Label scoreLabel = new Label("Score: " + gameEngine.playerList.get(i).getScore());
             Label levelLabel = new Label("Level: " + gameEngine.playerList.get(i).getLevel());
             Label comboLabel = new Label("Combo: " + gameEngine.playerList.get(i).getCombo());

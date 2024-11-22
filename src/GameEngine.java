@@ -49,6 +49,7 @@ public class GameEngine {
                             receiveScoreBoard(in);
                             break;
                         case 'T':
+                            receiveTurn(in); // you didn't add cause its cooked?
                             break;
                         default:
                             System.out.println(data);

@@ -132,17 +132,23 @@ public class JokerServer {
 
             synchronized (playerList) {
                 int ind = getCurrentPlayerIndex(clientSocket);
-                if (!gameTurn.containsKey(ind / 4) && gameTurn.get(ind / 4) != ind % 4){
-                    continue;
+                synchronized (gameTurn) {
+                    if (!gameTurn.containsKey(ind / 4) && gameTurn.get(ind / 4) != ind % 4) {
+                        continue;
+                    }
                 }
-
                 moveMerge(curPlayer, "" + dir);
                 playerList.set(ind, curPlayer);
 
-                playerMove.put(ind, playerMove.get(ind) + 1);
-                if (playerMove.get(ind) == 4) {
-                    playerMove.put(ind, 0);
-                    gameTurn.put(ind / 4, (gameTurn.get(ind / 4) + 1) % 4);
+                synchronized (playerMove) {
+                    playerMove.put(ind, playerMove.get(ind) + 1);
+                    if (playerMove.get(ind) == 4) {
+                        playerMove.put(ind, 0);
+
+                        synchronized (gameTurn) {
+                            gameTurn.put(ind / 4, (gameTurn.get(ind / 4) + 1) % 4);
+                        }
+                    }
                 }
                 for (int i : board) {
                     System.out.print(i + " ");
