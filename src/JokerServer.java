@@ -228,6 +228,8 @@ public class JokerServer {
         out.writeInt(numOfPlayers);
 
         for (int i = 0; i < lobbySize; i++) {
+            if (!connected.get(i))
+                continue;
             Player player = playerList.get(i);
             String curPlayerIpAddress = "";
             if (player.getIpAddress() != null)
