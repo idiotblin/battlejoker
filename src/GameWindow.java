@@ -132,7 +132,12 @@ public class GameWindow {
         }
 
         playerStats.getChildren().add(playerHBox); // Add the HBox to the main VBox
-        turnLabel.setText(String.format("Player %s's turn!", gameEngine.getTurnName()));
+        String name = gameEngine.getTurnName();
+        if (name == null) {
+            turnLabel.setText("Waiting for game to start...");
+        } else {
+            turnLabel.setText(String.format("Player %s's turn!", name));
+        }
     }
 
     private void render() {

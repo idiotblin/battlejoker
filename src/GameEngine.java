@@ -20,7 +20,7 @@ public class GameEngine {
     private boolean gameOver = false;
     private ArrayList<String> scoreBoard = new ArrayList<>();
 
-    private int turn;
+    private int turn = -1;
 
     private GameEngine(String ip, String port) throws IOException { // will be passed ip and Port
         clientSocket = new Socket(ip, Integer.parseInt(port)); // connect using Ip and Port
@@ -195,6 +195,8 @@ public class GameEngine {
     }
 
     public String getTurnName() {
+        if (turn == -1)
+            return null;
         return playerList.get(turn).getName();
     }
 }
