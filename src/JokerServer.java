@@ -118,11 +118,9 @@ public class JokerServer {
         System.out.println(clientSocket.getLocalPort());
 
         DataInputStream in = new DataInputStream(clientSocket.getInputStream());
-        DataOutputStream _out = new DataOutputStream(clientSocket.getOutputStream());
 
         char nameToken = (char) in.read();
         if (nameToken == 'N') {
-            System.out.println("N case received-------------");
             int nameLength = in.readInt();
             byte[] nameBytes = new byte[nameLength];
             in.read(nameBytes, 0, nameLength);
@@ -169,6 +167,10 @@ public class JokerServer {
             switch (charToken) {
                 case 'D':
                     dir = (char) in.read();
+                    break;
+                case 'P':
+                    receiveUploadedPuzzle(in);
+                    break;
                 default:
                     System.out.println(charToken);
             }
@@ -275,6 +277,17 @@ public class JokerServer {
         if (!inGame)
             out.write(Math.max(1, getCurrentPlayerIndex(client) - lobbySize + 1));
         out.flush();
+    }
+
+    public void receiveUploadedPuzzle(DataInputStream in) throws IOException {
+        System.out.println("receiveUploadedPuzzle---");
+        int len = in.readInt();
+        byte[] nameBytes = new byte[len];
+        in.read(nameBytes, 0, len);
+        String[] puzzle = in.toString().split(" ");
+        for (int i = 0; i < SIZE; i++) {
+            board[i] = Integer.parseInt(puzzle[i]);
+        }
     }
 
     private ArrayList<HashMap<String, String>> winner() throws SQLException {

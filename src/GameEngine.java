@@ -193,4 +193,11 @@ public class GameEngine {
     public int getPosInQueue() {
         return posInQueue;
     }
+
+    public void uploadPuzzle(String puzzle) throws IOException {
+        out.write('P');
+        out.writeInt(puzzle.length());
+        out.write(puzzle.getBytes());
+        out.flush();
+    }
 }
