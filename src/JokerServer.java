@@ -1,8 +1,7 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -25,6 +24,9 @@ public class JokerServer {
     private int totalMoveCount;
     public static final int LIMIT = 14;
     private final int MAX_MOVE = 4;
+    private String MULTICAST_ADDRESS = "224.0.7.7";
+    private int MULTICAST_PORT = 39993;
+    private DatagramSocket multicastSocket;
     Random random = new Random(0);
 
     public JokerServer(int port) {
@@ -39,6 +41,20 @@ public class JokerServer {
         } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+
+        Thread tMulticast = new Thread(() -> { // Send scoreboard with UDP
+            while (true) {
+                System.out.println("Sending Scores to Multicast Address...");
+                sendMulticast();
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        tMulticast.start();
+
         try {
             ServerSocket srvSocket = new ServerSocket(port);
             while (true) {
@@ -309,6 +325,37 @@ public class JokerServer {
                 }
             });
         }
+    }
+
+    public void sendMulticast() {
+        ArrayList<HashMap<String, String>> scores = new ArrayList<>();
+
+        try {
+            scores.addAll(Database.getScores());
+        } catch (SQLException ignored) {
+        }
+
+        StringBuilder tempResult = new StringBuilder();
+        scores.forEach(data -> {
+            String scoreStr = String.format("%s (%s)", data.get("score"), data.get("level"));
+            String sendString = String.format("%10s | %10s | %s", data.get("name"), scoreStr, data.get("time").substring(0, 16));
+            tempResult.append(sendString).append("\n"); // Add a newline as a delimiter
+        });
+        String finalResult = tempResult.toString();
+
+        try {
+            multicastSocket = new DatagramSocket(0);
+            sendMsg(finalResult, MULTICAST_ADDRESS, MULTICAST_PORT);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendMsg(String str, String destIP, int port) throws IOException {
+        InetAddress destination = InetAddress.getByName(destIP);
+        DatagramPacket packet =
+                new DatagramPacket(str.getBytes(), str.length(), destination, port);
+        multicastSocket.send(packet);
     }
 
     public void moveMerge(Player curPlayer, String dir) {
