@@ -9,7 +9,7 @@ import java.util.*;
 public class JokerServer {
     ArrayList<Player> playerList = new ArrayList<>();
     ArrayList<Socket> clientList = new ArrayList<>();
-    ArrayList<Boolean> connected;
+    ArrayList<Boolean> connected = new ArrayList<>();
     public static final int SIZE = 4;
     final int[] board = new int[SIZE * SIZE];
     private final Map<String, Runnable> actionMap = new HashMap<>();
