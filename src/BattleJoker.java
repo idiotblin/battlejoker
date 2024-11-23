@@ -14,7 +14,7 @@ public class BattleJoker extends Application {
             GetNameDialog dialog = new GetNameDialog();
             System.out.println(dialog.getIp());
             System.out.println(dialog.getPort());
-            GameWindow win = new GameWindow(primaryStage, dialog.getIp(), dialog.getPort());
+            GameWindow win = new GameWindow(primaryStage, dialog.getIp(), dialog.getPort(), dialog.getSelectedBackground());
             win.setName(dialog.getPlayerName());
             Database.connect();
         } catch (Exception ex) {
