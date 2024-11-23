@@ -1,7 +1,7 @@
 import java.net.Socket;
 
 public class Player {
-    private String name;
+    private String name = "";
     private String ipAddress;
     private int level = 1;
     private int score = 0;

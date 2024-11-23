@@ -130,8 +130,11 @@ public class JokerServer {
         }
         System.out.println("User: " + playerList.get(getCurrentPlayerIndex(clientSocket)).getName() + " connected!");
 
-        sendPuzzle(_out);
-        sendPlayerStats(_out);
+        for (Socket s : clientList) {
+            DataOutputStream out = new DataOutputStream(s.getOutputStream());
+            sendPuzzle(out);
+            sendPlayerStats(out);
+        }
 
         while (true) {
             if (gameOver) {
@@ -235,9 +238,7 @@ public class JokerServer {
                 continue;
             Player player = playerList.get(i);
 
-            String curPlayerName = "";
-            if (player.getName() != null)
-                curPlayerName = player.getName();
+            String curPlayerName = player.getName();
             out.writeInt(curPlayerName.length());
             out.write(curPlayerName.getBytes());
 
