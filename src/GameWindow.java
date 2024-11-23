@@ -1,24 +1,27 @@
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
 public class GameWindow {
     @FXML
@@ -33,7 +36,27 @@ public class GameWindow {
     @FXML
     VBox playerStats;
 
+    @FXML
+    Label turnLabel;
+
+    @FXML
+    Button waitButton;
+
+    @FXML
+    Button leaveButton;
+
+    @FXML
+    Label waiting;
+
+    @FXML
+    Label queueLabel;
+
+    @FXML
+    Button leave;
+
     Stage stage;
+    Stage waitOrLeaveStage;
+
     AnimationTimer animationTimer;
 
     final String imagePath = "images/";
@@ -59,11 +82,42 @@ public class GameWindow {
         stage.widthProperty().addListener(w -> onWidthChangedWindow(((ReadOnlyDoubleProperty) w).getValue()));
         stage.heightProperty().addListener(h -> onHeightChangedWindow(((ReadOnlyDoubleProperty) h).getValue()));
         stage.setOnCloseRequest(event -> quit());
+        leave.setOnMouseClicked(event -> quit());
 
         stage.show();
         initCanvas();
+        if (!gameEngine.isInGame()) {
+            showWaitOrLeaveUI();
+        } else {
+            gameStart();
+        }
+    }
 
+    private void showWaitOrLeaveUI() {
+        try {
+            FXMLLoader waitLoader = new FXMLLoader(getClass().getResource("waitOrLeaveUI.fxml"));
+            waitLoader.setController(this);
+            Parent waitRoot = waitLoader.load();
+            this.waitOrLeaveStage = new Stage();
+            waitOrLeaveStage.initModality(Modality.APPLICATION_MODAL);
+            waitOrLeaveStage.setTitle("Connecting...");
+            waitOrLeaveStage.setScene(new Scene(waitRoot));
+            waitButton.setOnMouseClicked(this::waitButtonClicked);
+            leaveButton.setOnMouseClicked(this::leaveButtonClicked);
+            waitOrLeaveStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void waitButtonClicked(Event event) {
+        waitOrLeaveStage.close();
         gameStart();
+    }
+
+    private void leaveButtonClicked(Event event) {
+        waitOrLeaveStage.close();
+        quit();
     }
 
     private void gameStart() {
@@ -114,6 +168,8 @@ public class GameWindow {
         HBox playerHBox = new HBox(10); // Create an HBox to contain player VBoxes
         for (int i = 0; i < numberOfPlayers; i++) {
             Label nameLabel = new Label(gameEngine.playerList.get(i).getName());
+            nameLabel.setFont(Font.font("Impact", 30));
+
             Label scoreLabel = new Label("Score: " + gameEngine.playerList.get(i).getScore());
             Label levelLabel = new Label("Level: " + gameEngine.playerList.get(i).getLevel());
             Label comboLabel = new Label("Combo: " + gameEngine.playerList.get(i).getCombo());
@@ -124,8 +180,25 @@ public class GameWindow {
 
             playerHBox.getChildren().add(playerVBox); // Add player's VBox to the HBox
         }
-
         playerStats.getChildren().add(playerHBox); // Add the HBox to the main VBox
+
+        String name = gameEngine.getTurnName(); // Show if game is not started yet; if yes, display whose turn it is now
+        if (name == null) {
+            turnLabel.setText("Waiting for game to start...");
+        } else {
+            turnLabel.setText(String.format("Player %s's turn!", name));
+        }
+
+        if (!gameEngine.isInGame()) {
+            int pos = gameEngine.getPosInQueue();
+            waiting.setVisible(true);
+            queueLabel.setText("Your position in the queue: " + pos);
+            queueLabel.setVisible(true);
+        } else {
+            waiting.setVisible(false);
+            queueLabel.setVisible(false);
+            leave.setVisible(false);
+        }
     }
 
     private void render() {
@@ -185,16 +258,5 @@ public class GameWindow {
 
     public void setName(String name) throws IOException {
         gameEngine.sendPlayerName(name);
-        // send ip address and port to gameEngine
     }
-
-//    public void setIp(String ip) throws IOException {
-//        gameEngine.setIp(ip);
-//        // send ip address and port to gameEngine
-//    }
-//
-//    public void setPort(String port) throws IOException {
-//        gameEngine.setPort(port);
-//        // send ip address and port to gameEngine
-//    }
 }

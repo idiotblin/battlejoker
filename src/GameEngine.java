@@ -20,6 +20,10 @@ public class GameEngine {
     private boolean gameOver = false;
     private ArrayList<String> scoreBoard = new ArrayList<>();
 
+    private int turn = -1;
+    private boolean isInGame;
+    private int posInQueue;
+
     private GameEngine(String ip, String port) throws IOException { // will be passed ip and Port
         clientSocket = new Socket(ip, Integer.parseInt(port)); // connect using Ip and Port
         in = new DataInputStream(clientSocket.getInputStream());
@@ -36,15 +40,24 @@ public class GameEngine {
                     System.out.println(data);
 
                     switch(data) {
-                        case 'A': // server sent an array, can add more stuff here like a score or username so can catch them here
+                        case 'A':
                             receiveArray(in);
                             break;
                         case 'S':
                             receivePlayerStats(in);
                             break;
                         case 'G':
-                            gameOver = true;
+                            this.gameOver = true;
                             receiveScoreBoard(in);
+                            break;
+                        case 'T':
+                            this.turn = in.readInt();
+                            break;
+                        case 'N':
+                            this.isInGame = in.readBoolean();
+                            if (!this.isInGame) {
+                                this.posInQueue = in.readInt();
+                            }
                             break;
                         default:
                             System.out.println(data);
@@ -184,5 +197,19 @@ public class GameEngine {
 
     public ArrayList<String> getScoreBoard() {
         return scoreBoard;
+    }
+
+    public String getTurnName() {
+        if (turn == -1)
+            return null;
+        return playerList.get(turn).getName();
+    }
+
+    public boolean isInGame() {
+        return isInGame;
+    }
+
+    public int getPosInQueue() {
+        return posInQueue;
     }
 }
