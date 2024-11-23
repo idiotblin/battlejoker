@@ -53,7 +53,7 @@ public class GameEngine {
                         case 'T':
                             this.turn = in.readInt();
                             break;
-                        case 'N':
+                        case 'I':
                             this.isInGame = in.readBoolean();
                             if (!this.isInGame) {
                                 this.posInQueue = in.readInt();

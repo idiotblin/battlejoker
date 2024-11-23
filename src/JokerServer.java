@@ -61,6 +61,11 @@ public class JokerServer {
                             gameStarted = true;
                         }
                     }
+                } else {
+                    synchronized (connected) {
+                        connected.set(getCurrentPlayerIndex(clientSocket), true);
+                    }
+                    sendInGame(clientSocket, true);
                 }
 
                 Thread t = new Thread(() -> {
@@ -151,11 +156,11 @@ public class JokerServer {
                     for (int i = lobbySize; i < clientList.size(); i++) {
                         sendInGame(clientList.get(i), false);
                     }
-                    continue;
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
+            System.out.println("Lobby size: " + lobbySize);
             char dir = '0';
             char charToken = (char) in.read();
 
@@ -175,7 +180,6 @@ public class JokerServer {
                     gameStarted = true;
                 }
                 moveMerge(curPlayer, "" + dir);
-                playerList.set(ind, curPlayer);
                 curMoveCount++;
 
                 if (curMoveCount == MAX_MOVE) {
@@ -264,13 +268,16 @@ public class JokerServer {
 
     public void sendTurn(DataOutputStream out) throws IOException {
         out.write('T');
-        out.writeInt(gameTurn);
+        if (gameStarted)
+            out.writeInt(gameTurn);
+        else
+            out.writeInt(-1);
         out.flush();
     }
 
     public void sendInGame(Socket client, boolean inGame) throws IOException {
         DataOutputStream out = new DataOutputStream(client.getOutputStream());
-        out.write('N');
+        out.write('I');
         out.writeBoolean(inGame);
         if (!inGame)
             out.write(Math.max(1, getCurrentPlayerIndex(client) - lobbySize + 1));
@@ -293,7 +300,7 @@ public class JokerServer {
     public void sendGameOver() throws IOException, SQLException {
         ArrayList<HashMap<String, String>> scores = winner();
         scores.addAll(Database.getScores());
-        for (Socket client: clientList) {
+        for (Socket client : clientList) {
             DataOutputStream out = new DataOutputStream(client.getOutputStream());
             out.write('G');
             out.writeInt(scores.size());
