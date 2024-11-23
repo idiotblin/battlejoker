@@ -117,22 +117,21 @@ public class JokerServer {
         System.out.println(clientSocket.getInetAddress());
         System.out.println(clientSocket.getLocalPort());
 
-        Player curPlayer = new Player(clientSocket.getInetAddress().toString());
-
         DataInputStream in = new DataInputStream(clientSocket.getInputStream());
         DataOutputStream _out = new DataOutputStream(clientSocket.getOutputStream());
 
-        sendPuzzle(_out);
-        sendPlayerStats(_out);
-
         char nameToken = (char) in.read();
         if (nameToken == 'N') {
+            System.out.println("N case received-------------");
             int nameLength = in.readInt();
             byte[] nameBytes = new byte[nameLength];
             in.read(nameBytes, 0, nameLength);
-            curPlayer.setName(new String(nameBytes));
+            playerList.get(getCurrentPlayerIndex(clientSocket)).setName(new String(nameBytes));
         }
-        System.out.println("User: " + curPlayer.getName() + " connected!");
+        System.out.println("User: " + playerList.get(getCurrentPlayerIndex(clientSocket)).getName() + " connected!");
+
+        sendPuzzle(_out);
+        sendPlayerStats(_out);
 
         while (true) {
             if (gameOver) {
@@ -179,7 +178,7 @@ public class JokerServer {
                 if (!gameStarted && ind == 0) {
                     gameStarted = true;
                 }
-                moveMerge(curPlayer, "" + dir);
+                moveMerge(playerList.get(ind), "" + dir);
                 curMoveCount++;
 
                 if (curMoveCount == MAX_MOVE) {
@@ -235,17 +234,10 @@ public class JokerServer {
             if (!connected.get(i))
                 continue;
             Player player = playerList.get(i);
-            String curPlayerIpAddress = "";
-            if (player.getIpAddress() != null)
-                curPlayerIpAddress = player.getIpAddress();
 
             String curPlayerName = "";
             if (player.getName() != null)
                 curPlayerName = player.getName();
-
-            out.writeInt(curPlayerIpAddress.length());
-            out.write(curPlayerIpAddress.getBytes());
-
             out.writeInt(curPlayerName.length());
             out.write(curPlayerName.getBytes());
 

@@ -180,7 +180,6 @@ public class GameWindow {
         for (int i = 0; i < numberOfPlayers; i++) {
             Label nameLabel = new Label(gameEngine.playerList.get(i).getName());
             nameLabel.setFont(Font.font("Impact", 30));
-
             Label scoreLabel = new Label("Score: " + gameEngine.playerList.get(i).getScore());
             Label levelLabel = new Label("Level: " + gameEngine.playerList.get(i).getLevel());
             Label comboLabel = new Label("Combo: " + gameEngine.playerList.get(i).getCombo());

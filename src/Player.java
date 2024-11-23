@@ -12,6 +12,9 @@ public class Player {
         this.ipAddress = ipAddress;
     }
 
+    public Player() {
+
+    }
     public String getName() {
         return name;
     }

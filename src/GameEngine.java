@@ -29,10 +29,6 @@ public class GameEngine {
         in = new DataInputStream(clientSocket.getInputStream());
         out = new DataOutputStream(clientSocket.getOutputStream());
 
-//        Player curPlayer = new Player(InetAddress.getLocalHost().getHostAddress());
-//        // if playerList.size() < 4: ... else do not allow
-//        playerList.add(curPlayer);
-
         receiverThread = new Thread(()->{
             try {
                 while (true) {
@@ -83,19 +79,15 @@ public class GameEngine {
     }
 
     private void receivePlayerStats(DataInputStream in) throws IOException {
+        playerList.clear();
         int numOfPlayers = in.readInt(); // check players, if exists update, if absent add
         for (int i = 0; i < numOfPlayers; i++) {
-            int ipLength = in.readInt();
-            byte[] ipBytes = new byte[ipLength];
-            in.read(ipBytes, 0, ipLength);
-            String ipAddress = new String(ipBytes);
-
-            updatePlayerList(in, ipAddress);
+            updatePlayerList(in);
         }
     }
 
-    private void updatePlayerList(DataInputStream in, String ipAddress) throws IOException {
-        Player player = new Player(ipAddress);
+    private void updatePlayerList(DataInputStream in) throws IOException {
+        Player player = new Player();
 
         int nameLength = in.readInt();
         byte[] nameBytes = new byte[nameLength];
@@ -113,11 +105,7 @@ public class GameEngine {
 
         totalMoveCount = in.readInt();
 
-        if (playerList.isEmpty() || (!playerListContains(ipAddress))) {
-            playerList.add(player);
-        } else {
-            playerList.set(getPlayerIndex(ipAddress), player);
-        }
+        playerList.add(player);
     }
 
     private int getPlayerIndex(String ipAddress) {
@@ -131,14 +119,6 @@ public class GameEngine {
             index++;
         }
         return index;
-    }
-
-    private boolean playerListContains(String ipAddress) {
-        for (Player p : playerList)
-            if (p.getIpAddress().equals(ipAddress))
-                return true;
-
-        return false;
     }
 
     public void receiveArray(DataInputStream in) throws IOException {
@@ -164,6 +144,7 @@ public class GameEngine {
         out.write('N');
         out.writeInt(name.length());
         out.write(name.getBytes());
+        out.flush();
     }
 
     /**
