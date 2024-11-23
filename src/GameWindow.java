@@ -96,6 +96,7 @@ public class GameWindow {
     private void showWaitOrLeaveUI() {
         try {
             FXMLLoader waitLoader = new FXMLLoader(getClass().getResource("waitOrLeaveUI.fxml"));
+            waitLoader.setController(this);
             Parent waitRoot = waitLoader.load();
             this.waitOrLeaveStage = new Stage();
             waitOrLeaveStage.initModality(Modality.APPLICATION_MODAL);
