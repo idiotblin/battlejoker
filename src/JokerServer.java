@@ -142,6 +142,7 @@ public class JokerServer {
         System.out.println(clientSocket.getLocalPort());
 
         DataInputStream in = new DataInputStream(clientSocket.getInputStream());
+        DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
 
         char nameToken = (char) in.read();
         if (nameToken == 'N') {
@@ -153,10 +154,10 @@ public class JokerServer {
         System.out.println("User: " + playerList.get(getCurrentPlayerIndex(clientSocket)).getName() + " connected!");
 
         for (Socket s : clientList) {
-            DataOutputStream out = new DataOutputStream(s.getOutputStream());
-            sendPuzzle(out);
-            sendPlayerStats(out);
-            sendTurn(out);
+            DataOutputStream _out = new DataOutputStream(s.getOutputStream());
+            sendPuzzle(_out);
+            sendPlayerStats(_out);
+            sendTurn(_out);
         }
 
         while (true) {
@@ -195,18 +196,14 @@ public class JokerServer {
                     System.out.println("started: " + gameStarted);
                     System.out.println("turn: " + gameTurn);
                     synchronized (clientList) {
-                        for (int i = 0; i < clientList.size(); i++) {
-                            sendInGame(clientList.get(i), i < lobbySize);
-                            System.out.println(i + " player is in game: " + (i < lobbySize));
-                            DataOutputStream out = new DataOutputStream(clientList.get(i).getOutputStream());
-                            sendPlayerStats(out);
-                            sendTurn(out);
-                            sendPuzzle(out);
-                        }
+                        sendInGame(clientSocket, getCurrentPlayerIndex(clientSocket) < lobbySize);
+                        sendPlayerStats(out);
+                        sendTurn(out);
+                        sendPuzzle(out);
                     }
-                    if (!clientList.contains(clientSocket)) {
-                        clientSocket.close();
-                    }
+//                    if (!clientList.contains(clientSocket)) {
+//                        clientSocket.close();
+//                    }
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -234,10 +231,10 @@ public class JokerServer {
                     gameStarted = true;
                     gameTurn = 0;
                     for (Socket s : clientList) {
-                        DataOutputStream out = new DataOutputStream(s.getOutputStream());
-                        sendPuzzle(out);
-                        sendPlayerStats(out);
-                        sendTurn(out);
+                        DataOutputStream _out = new DataOutputStream(s.getOutputStream());
+                        sendPuzzle(_out);
+                        sendPlayerStats(_out);
+                        sendTurn(_out);
                     }
                 }
                 moveMerge(playerList.get(ind), "" + dir);
@@ -254,13 +251,13 @@ public class JokerServer {
 //              gameOver = !nextRound();
 
                 for (Socket s : clientList) {
-                    DataOutputStream out = new DataOutputStream(s.getOutputStream());
-                    out.write(dir);
-                    out.flush();
+                    DataOutputStream _out = new DataOutputStream(s.getOutputStream());
+                    _out.write(dir);
+                    _out.flush();
 
-                    sendPuzzle(out);
-                    sendPlayerStats(out);
-                    sendTurn(out);
+                    sendPuzzle(_out);
+                    sendPlayerStats(_out);
+                    sendTurn(_out);
                 }
             }
         }
