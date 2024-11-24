@@ -69,7 +69,7 @@ public class JokerServer {
                         if (!gameStarted) {
                             lobbySize++;
                             connected.add(true);
-                            sendInGame(clientSocket, lobbySize < 4);
+                            sendInGame(clientSocket, lobbySize <= 4);
                         } else {
                             sendInGame(clientSocket, false);
                         }
@@ -84,7 +84,12 @@ public class JokerServer {
                     }
                     sendInGame(clientSocket, true);
                 }
-
+                for (Socket s : clientList) {
+                    DataOutputStream out = new DataOutputStream(s.getOutputStream());
+                    sendPuzzle(out);
+                    sendPlayerStats(out);
+                    sendTurn(out);
+                }
                 Thread t = new Thread(() -> {
                     try {
                         serve(clientSocket);
@@ -149,6 +154,7 @@ public class JokerServer {
             DataOutputStream out = new DataOutputStream(s.getOutputStream());
             sendPuzzle(out);
             sendPlayerStats(out);
+            sendTurn(out);
         }
 
         while (true) {
@@ -158,20 +164,44 @@ public class JokerServer {
                 try {
                     sendGameOver();
                     gameStarted = false;
+                    level = 1;
                     gameTurn = -1;
+                    score = 0;
+                    combo = 0;
                     curMoveCount = 0;
+                    totalMoveCount = 0;
                     gameOver = false;
                     if (lobbySize > 0) {
                         clientList.subList(0, lobbySize).clear();
                         playerList.subList(0, lobbySize).clear();
+                        System.out.println("clientlist size: " + clientList.size());
+                        System.out.println("playerlist size: " + playerList.size());
                     }
                     lobbySize = Math.min(4, clientList.size());
+                    System.out.println("lobby: " + lobbySize);
+                    //reset board
+                    Arrays.fill(board, 0);
+                    board[random.nextInt(SIZE * SIZE)] = 1;
+                    for (int i = 0; i < 16; i++) {
+                        System.out.print(board[i] + " ");
+                    }
+                    System.out.println();
                     if (lobbySize == 4) {
                         gameStarted = true;
                         gameTurn = 0;
                     }
+                    System.out.println("started: " + gameStarted);
+                    System.out.println("turn: " + gameTurn);
                     for (int i = 0; i < clientList.size(); i++) {
                         sendInGame(clientList.get(i), i < lobbySize);
+                        System.out.println(i + " player is in game: " + (i < lobbySize));
+                        DataOutputStream out = new DataOutputStream(clientList.get(i).getOutputStream());
+                        sendPlayerStats(out);
+                        sendTurn(out);
+                        sendPuzzle(out);
+                    }
+                    if (!clientList.contains(clientSocket)) {
+                        clientSocket.close();
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -198,9 +228,15 @@ public class JokerServer {
                 }
                 if (!gameStarted && ind == 0) {
                     gameStarted = true;
+                    gameTurn = 0;
+                    for (Socket s : clientList) {
+                        DataOutputStream out = new DataOutputStream(s.getOutputStream());
+                        sendPuzzle(out);
+                        sendPlayerStats(out);
+                        sendTurn(out);
+                    }
                 }
                 moveMerge(playerList.get(ind), "" + dir);
-                curMoveCount++;
 
                 if (curMoveCount == MAX_MOVE) {
                     curMoveCount = 0;
@@ -238,9 +274,11 @@ public class JokerServer {
 
     private int getCurrentPlayerIndex(Socket clientSocket) {
         int index = 0;
-        for (int i = 0; i < playerList.size(); i++) {
-            if (playerList.get(i).getIpAddress().equals(clientSocket.getInetAddress().toString())) {
-                index = i;
+        synchronized (playerList) {
+            for (int i = 0; i < playerList.size(); i++) {
+                if (playerList.get(i).getIpAddress().equals(clientSocket.getInetAddress().toString())) {
+                    index = i;
+                }
             }
         }
         return index;
@@ -292,7 +330,7 @@ public class JokerServer {
         out.write('I');
         out.writeBoolean(inGame);
         if (!inGame)
-            out.write(Math.max(1, getCurrentPlayerIndex(client) - lobbySize + 1));
+            out.writeInt(Math.max(1, getCurrentPlayerIndex(client) - lobbySize + 1));
         out.flush();
     }
 
@@ -325,7 +363,10 @@ public class JokerServer {
     public void sendGameOver() throws IOException, SQLException {
         ArrayList<HashMap<String, String>> scores = winner();
         scores.addAll(Database.getScores());
+        int count = 0;
         for (Socket client : clientList) {
+            if (count >= lobbySize)
+                break;
             DataOutputStream out = new DataOutputStream(client.getOutputStream());
             out.write('G');
             out.writeInt(scores.size());
@@ -340,6 +381,7 @@ public class JokerServer {
                     System.out.println(e.getMessage());
                 }
             });
+            count++;
         }
     }
 
@@ -389,6 +431,7 @@ public class JokerServer {
                 // determine whether the game is over or not
                 if (numOfTilesMoved > 0) {
                     totalMoveCount++;
+                    curMoveCount++;
                     gameOver = level == LIMIT || !nextRound();
                 } else
                     gameOver = isFull();

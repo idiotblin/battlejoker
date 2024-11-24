@@ -43,8 +43,12 @@ public class GameEngine {
                             receivePlayerStats(in);
                             break;
                         case 'G':
-                            this.gameOver = true;
-                            receiveScoreBoard(in);
+                            if (isInGame) {
+                                this.gameOver = true;
+                                receiveScoreBoard(in);
+                            } else {
+                                this.turn = -1;
+                            }
                             break;
                         case 'T':
                             this.turn = in.readInt();
