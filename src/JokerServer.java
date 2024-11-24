@@ -196,10 +196,13 @@ public class JokerServer {
                     System.out.println("started: " + gameStarted);
                     System.out.println("turn: " + gameTurn);
                     synchronized (clientList) {
-                        sendInGame(clientSocket, getCurrentPlayerIndex(clientSocket) < lobbySize);
-                        sendPlayerStats(out);
-                        sendTurn(out);
-                        sendPuzzle(out);
+                        for (int i = 0; i < clientList.size(); i++) {
+                            DataOutputStream _out = new DataOutputStream(clientList.get(i).getOutputStream());
+                            sendInGame(clientList.get(i), i < lobbySize);
+                            sendPuzzle(_out);
+                            sendPlayerStats(_out);
+                            sendTurn(_out);
+                        }
                     }
 //                    if (!clientList.contains(clientSocket)) {
 //                        clientSocket.close();
@@ -380,6 +383,7 @@ public class JokerServer {
                         System.out.println(e.getMessage());
                     }
                 });
+                out.flush();
             }
         }
     }
