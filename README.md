@@ -20,11 +20,11 @@ BattleJoker game made multiplayer. Supports a single lobby of 4 concurrent playe
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/aswaddd/BattleJoker.git
+    git clone https://github.com/aswaddd/battleJoker.git
     ```
 2. Navigate to the project directory:
     ```bash
-    cd BattleJoker
+    cd battleJoker
     ```
 
 ## Usage
@@ -36,5 +36,3 @@ JokerServer & BattleJoker classes.
 ## For Multicast Scoreboard
 
 Separate the file to a different directory and run it while the JokerServer program is active.
-
-```
