@@ -10,29 +10,30 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
 
 public class MulticastScoreboardWindow {
-    Stage stage;
+	Stage stage;
 
     @FXML
-    ListView<String> scoreList;
+    ListView<String> scoreList = new ListView<>();
 
-    public MulticastScoreboardWindow() throws IOException {
+    public MulticastScoreboardWindow(Stage stage, List<String> strings) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("multicastScoreUI.fxml"));
         loader.setController(this);
         Parent root = loader.load();
         Scene scene = new Scene(root);
 
-        stage = new Stage();
+        this.stage = stage;
         stage.setScene(scene);
         stage.setTitle("Top 10 historical Scores");
         stage.setMinWidth(scene.getWidth());
         stage.setMinHeight(scene.getHeight());
 
         setFont(14);
-        updateList();
+        updateList(strings);
 
-        stage.showAndWait();
+        stage.show();
     }
 
     private void setFont(int fontSize) {
@@ -50,9 +51,10 @@ public class MulticastScoreboardWindow {
         });
     }
 
-    private void updateList() {
+    private void updateList(List<String> strings) {
         try {
             ObservableList<String> items = FXCollections.observableArrayList();
+            items.addAll(strings);
             scoreList.setItems(items);
         } catch(Exception ex) {
             ex.printStackTrace();
