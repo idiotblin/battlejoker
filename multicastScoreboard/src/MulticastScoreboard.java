@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.fxml.FXML;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MulticastScoreboard extends Application {
-    final static String MULTICAST_ADDRESS = "223.0.7.7";
+    final static String MULTICAST_ADDRESS = "224.0.7.7";
     final static int MULTICAST_PORT = 39993;
 
     private static List<String> strings = new ArrayList<>();
@@ -20,6 +21,11 @@ public class MulticastScoreboard extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         new MulticastScoreboardWindow(primaryStage, strings);
+    }
+
+    @FXML
+    public void inialize() {
+
     }
 
     private static void receiveUDP() {
@@ -32,16 +38,15 @@ public class MulticastScoreboard extends Application {
             byte[] buffer = new byte[1024];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
-            while(true) {
-                socket.receive(packet);
-                int len = packet.getLength();
-                String src = packet.getAddress().getHostAddress().toString();
-                int port = packet.getPort();
-                System.out.println("Packet received from: " + src + " " + port);
+            socket.receive(packet);
+            int len = packet.getLength();
+            String src = packet.getAddress().getHostAddress().toString();
+            int port = packet.getPort();
+            System.out.println("Packet received from: " + src + " " + port);
 
-                String rawMessage = new String(buffer, 0, len);
-                strings = Arrays.asList(rawMessage.split("\n"));
-            }
+            String rawMessage = new String(buffer, 0, len);
+            strings = Arrays.asList(rawMessage.split("\n"));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -50,10 +55,10 @@ public class MulticastScoreboard extends Application {
     public static void main(String[] args) {
         System.setErr(new FilteredStream(System.err));
         
-        Thread t = new Thread(()->{
+//        Thread t = new Thread(()->{
         	receiveUDP();
-        });
-        t.start();
+//        });
+//        t.start();
 
         launch();
     }

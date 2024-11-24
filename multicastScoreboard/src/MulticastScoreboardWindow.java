@@ -1,4 +1,6 @@
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,6 +20,8 @@ public class MulticastScoreboardWindow {
     @FXML
     ListView<String> scoreList = new ListView<>();
 
+    private ObservableList observableStrings = FXCollections.observableArrayList();
+
     public MulticastScoreboardWindow(Stage stage, List<String> strings) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("multicastScoreUI.fxml"));
         loader.setController(this);
@@ -32,6 +36,14 @@ public class MulticastScoreboardWindow {
 
         setFont(14);
         updateList(strings);
+
+        observableStrings.addListener((ListChangeListener<String>) change -> {
+            while (change.next()) {
+                if (change.wasAdded() || change.wasRemoved()) {
+                    scoreList.setItems(FXCollections.observableArrayList(observableStrings));
+                }
+            }
+        });
 
         stage.show();
     }
@@ -52,13 +64,13 @@ public class MulticastScoreboardWindow {
     }
 
     private void updateList(List<String> strings) {
-        try {
-            ObservableList<String> items = FXCollections.observableArrayList();
-            items.addAll(strings);
-            scoreList.setItems(items);
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
+            try {
+                ObservableList<String> items = FXCollections.observableArrayList();
+                items.addAll(strings);
+                scoreList.setItems(items);
+            } catch(Exception ex) {
+                ex.printStackTrace();
+            }
     }
 }
 
