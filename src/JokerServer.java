@@ -118,11 +118,13 @@ public class JokerServer {
                                 connected.set(ind, false);
                             }
                         }
-                        for (int i = 0; i < clientList.size(); i++) { // update users whether they are in game or not
-                            try {
-                                sendInGame(clientList.get(i), i < lobbySize);
-                            } catch (IOException ex) {
-                                throw new RuntimeException(ex);
+                        synchronized (clientList) {
+                            for (int i = 0; i < clientList.size(); i++) { // update users whether they are in game or not
+                                try {
+                                    sendInGame(clientList.get(i), i < lobbySize);
+                                } catch (IOException ex) {
+                                    throw new RuntimeException(ex);
+                                }
                             }
                         }
                     }
@@ -192,13 +194,15 @@ public class JokerServer {
                     }
                     System.out.println("started: " + gameStarted);
                     System.out.println("turn: " + gameTurn);
-                    for (int i = 0; i < clientList.size(); i++) {
-                        sendInGame(clientList.get(i), i < lobbySize);
-                        System.out.println(i + " player is in game: " + (i < lobbySize));
-                        DataOutputStream out = new DataOutputStream(clientList.get(i).getOutputStream());
-                        sendPlayerStats(out);
-                        sendTurn(out);
-                        sendPuzzle(out);
+                    synchronized (clientList) {
+                        for (int i = 0; i < clientList.size(); i++) {
+                            sendInGame(clientList.get(i), i < lobbySize);
+                            System.out.println(i + " player is in game: " + (i < lobbySize));
+                            DataOutputStream out = new DataOutputStream(clientList.get(i).getOutputStream());
+                            sendPlayerStats(out);
+                            sendTurn(out);
+                            sendPuzzle(out);
+                        }
                     }
                     if (!clientList.contains(clientSocket)) {
                         clientSocket.close();
@@ -363,25 +367,23 @@ public class JokerServer {
     public void sendGameOver() throws IOException, SQLException {
         ArrayList<HashMap<String, String>> scores = winner();
         scores.addAll(Database.getScores());
-        int count = 0;
-        for (Socket client : clientList) {
-            if (count >= lobbySize)
-                break;
-            DataOutputStream out = new DataOutputStream(client.getOutputStream());
-            out.write('G');
-            out.writeInt(scores.size());
-            scores.forEach(data -> {
-                String scoreStr = String.format("%s (%s)", data.get("score"), data.get("level"));
-                try {
-                    String sendString = String.format("%10s | %10s | %s", data.get("name"), scoreStr, data.get("time").substring(0, 16));
-                    out.writeInt(sendString.length());
-                    out.write(sendString.getBytes());
-                } catch (IOException e) {
-                    System.out.println("MISTAKE WHEN SENDING SCORES, player name: " + playerList.get(getCurrentPlayerIndex(client)).getName());
-                    System.out.println(e.getMessage());
-                }
-            });
-            count++;
+        synchronized (clientList) {
+            for (Socket client : clientList) {
+                DataOutputStream out = new DataOutputStream(client.getOutputStream());
+                out.write('G');
+                out.writeInt(scores.size());
+                scores.forEach(data -> {
+                    String scoreStr = String.format("%s (%s)", data.get("score"), data.get("level"));
+                    try {
+                        String sendString = String.format("%10s | %10s | %s", data.get("name"), scoreStr, data.get("time").substring(0, 16));
+                        out.writeInt(sendString.length());
+                        out.write(sendString.getBytes());
+                    } catch (IOException e) {
+                        System.out.println("MISTAKE WHEN SENDING SCORES, player name: " + playerList.get(getCurrentPlayerIndex(client)).getName());
+                        System.out.println(e.getMessage());
+                    }
+                });
+            }
         }
     }
 

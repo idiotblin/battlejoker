@@ -43,10 +43,11 @@ public class GameEngine {
                             receivePlayerStats(in);
                             break;
                         case 'G':
-                            if (isInGame) {
+                            receiveScoreBoard(in);
+                            if (this.isInGame) {
                                 this.gameOver = true;
-                                receiveScoreBoard(in);
                             } else {
+                                this.gameOver = false;
                                 this.turn = -1;
                             }
                             break;
@@ -78,7 +79,12 @@ public class GameEngine {
             byte[] recBytes = new byte[recLength];
             in.read(recBytes, 0, recLength);
             String record = new String(recBytes);
-            scoreBoard.add(record);
+
+            if (this.isInGame) {
+                synchronized (scoreBoard) {
+                    scoreBoard.add(record);
+                }
+            }
         }
     }
 
