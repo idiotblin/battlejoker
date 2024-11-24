@@ -79,10 +79,12 @@ public class GameEngine {
     }
 
     private void receivePlayerStats(DataInputStream in) throws IOException {
-        playerList.clear();
-        int numOfPlayers = in.readInt(); // check players, if exists update, if absent add
-        for (int i = 0; i < numOfPlayers; i++) {
-            updatePlayerList(in);
+        synchronized (playerList) {
+            playerList.clear();
+            int numOfPlayers = in.readInt(); // check players, if exists update, if absent add
+            for (int i = 0; i < numOfPlayers; i++) {
+                updatePlayerList(in);
+            }
         }
     }
 
@@ -93,7 +95,6 @@ public class GameEngine {
         byte[] nameBytes = new byte[nameLength];
         in.read(nameBytes, 0, nameLength);
         player.setName(new String(nameBytes));
-
         int tempLevel = in.readInt();
         player.setLevel(tempLevel);
 
@@ -183,7 +184,9 @@ public class GameEngine {
     public String getTurnName() {
         if (turn == -1)
             return null;
-        return playerList.get(turn).getName();
+        synchronized (playerList) {
+            return playerList.get(turn).getName();
+        }
     }
 
     public boolean isInGame() {

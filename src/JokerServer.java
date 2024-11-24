@@ -160,7 +160,6 @@ public class JokerServer {
                     ex.printStackTrace();
                 }
             }
-            System.out.println("Lobby size: " + lobbySize);
             char dir = '0';
             char charToken = (char) in.read();
 
@@ -190,10 +189,11 @@ public class JokerServer {
                     curMoveCount = 0;
                     gameTurn = (gameTurn + 1) % lobbySize;
                 }
-
+                System.out.print("Current board: ");
                 for (int i : board) {
                     System.out.print(i + " ");
                 }
+                System.out.println();
 //              gameOver = !nextRound();
 
                 for (Socket s : clientList) {
@@ -282,10 +282,10 @@ public class JokerServer {
     public void receiveUploadedPuzzle(DataInputStream in) throws IOException {
         System.out.println("receiveUploadedPuzzle---");
         int len = in.readInt();
-        byte[] nameBytes = new byte[len];
-        in.read(nameBytes, 0, len);
-        String[] puzzle = in.toString().split(" ");
-        for (int i = 0; i < SIZE; i++) {
+        byte[] puzzleBytes = new byte[len];
+        in.read(puzzleBytes, 0, len);
+        String[] puzzle = (new String(puzzleBytes)).split(" ");
+        for (int i = 0; i < SIZE * SIZE; i++) {
             board[i] = Integer.parseInt(puzzle[i]);
         }
     }

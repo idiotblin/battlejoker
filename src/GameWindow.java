@@ -230,17 +230,18 @@ public class GameWindow {
 
         HBox playerHBox = new HBox(10); // Create an HBox to contain player VBoxes
         for (int i = 0; i < numberOfPlayers; i++) {
-            Label nameLabel = new Label(gameEngine.playerList.get(i).getName());
-            nameLabel.setFont(Font.font("Impact", 30));
-            Label scoreLabel = new Label("Score: " + gameEngine.playerList.get(i).getScore());
-            Label levelLabel = new Label("Level: " + gameEngine.playerList.get(i).getLevel());
-            Label comboLabel = new Label("Combo: " + gameEngine.playerList.get(i).getCombo());
-            Label moveCountLabel = new Label("# of Moves: " + gameEngine.getMoveCount());
+            synchronized (gameEngine.playerList) {
+                Label nameLabel = new Label(gameEngine.playerList.get(i).getName());
+                nameLabel.setFont(Font.font("Impact", 30));
+                Label scoreLabel = new Label("Score: " + gameEngine.playerList.get(i).getScore());
+                Label levelLabel = new Label("Level: " + gameEngine.playerList.get(i).getLevel());
+                Label comboLabel = new Label("Combo: " + gameEngine.playerList.get(i).getCombo());
+                Label moveCountLabel = new Label("# of Moves: " + gameEngine.getMoveCount());
+                VBox playerVBox = new VBox(5); // Create a VBox for each player
+                playerVBox.getChildren().addAll(nameLabel, scoreLabel, levelLabel, comboLabel, moveCountLabel);
 
-            VBox playerVBox = new VBox(5); // Create a VBox for each player
-            playerVBox.getChildren().addAll(nameLabel, scoreLabel, levelLabel, comboLabel, moveCountLabel);
-
-            playerHBox.getChildren().add(playerVBox); // Add player's VBox to the HBox
+                playerHBox.getChildren().add(playerVBox); // Add player's VBox to the HBox
+            }
         }
         playerStats.getChildren().add(playerHBox); // Add the HBox to the main VBox
 
