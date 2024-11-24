@@ -13,52 +13,17 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MulticastScoreboard extends Application {
-    final static String MULTICAST_ADDRESS = "224.0.7.7";
-    final static int MULTICAST_PORT = 39993;
 
-    private static List<String> strings = new ArrayList<>();
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        new MulticastScoreboardWindow(primaryStage, strings);
+        new MulticastScoreboardWindow(primaryStage);
     }
 
-    @FXML
-    public void inialize() {
-
-    }
-
-    private static void receiveUDP() {
-        System.setProperty("java.net.preferIPv4Stack", "true");
-
-        try {
-            MulticastSocket socket = new MulticastSocket(MULTICAST_PORT);
-            socket.joinGroup(InetAddress.getByName(MULTICAST_ADDRESS));
-
-            byte[] buffer = new byte[1024];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-
-            socket.receive(packet);
-            int len = packet.getLength();
-            String src = packet.getAddress().getHostAddress().toString();
-            int port = packet.getPort();
-            System.out.println("Packet received from: " + src + " " + port);
-
-            String rawMessage = new String(buffer, 0, len);
-            strings = Arrays.asList(rawMessage.split("\n"));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public static void main(String[] args) {
         System.setErr(new FilteredStream(System.err));
-        
-//        Thread t = new Thread(()->{
-        	receiveUDP();
-//        });
-//        t.start();
 
         launch();
     }

@@ -1,6 +1,6 @@
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,17 +12,19 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.List;
 
 public class MulticastScoreboardWindow {
-	Stage stage;
+    Stage stage;
 
     @FXML
     ListView<String> scoreList = new ListView<>();
 
-    private ObservableList observableStrings = FXCollections.observableArrayList();
+    final ScoreboardEngine scoreboardEngine = ScoreboardEngine.getInstance();
 
-    public MulticastScoreboardWindow(Stage stage, List<String> strings) throws IOException {
+    private ObservableList<String> observableStrings = FXCollections.observableArrayList();
+    private AnimationTimer animationTimer;
+
+    public MulticastScoreboardWindow(Stage stage) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("multicastScoreUI.fxml"));
         loader.setController(this);
         Parent root = loader.load();
@@ -30,20 +32,14 @@ public class MulticastScoreboardWindow {
 
         this.stage = stage;
         stage.setScene(scene);
-        stage.setTitle("Top 10 historical Scores");
+        stage.setTitle("Top 10 Historical Scores");
         stage.setMinWidth(scene.getWidth());
         stage.setMinHeight(scene.getHeight());
 
         setFont(14);
-        updateList(strings);
 
-        observableStrings.addListener((ListChangeListener<String>) change -> {
-            while (change.next()) {
-                if (change.wasAdded() || change.wasRemoved()) {
-                    scoreList.setItems(FXCollections.observableArrayList(observableStrings));
-                }
-            }
-        });
+        scoreList.setItems(observableStrings);
+        startRendering();
 
         stage.show();
     }
@@ -63,14 +59,23 @@ public class MulticastScoreboardWindow {
         });
     }
 
-    private void updateList(List<String> strings) {
+    private void startRendering() {
+        animationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                updateList();
+            }
+        };
+        animationTimer.start();
+    }
+
+    private void updateList() {
+        Platform.runLater(() -> {
             try {
-                ObservableList<String> items = FXCollections.observableArrayList();
-                items.addAll(strings);
-                scoreList.setItems(items);
-            } catch(Exception ex) {
+                observableStrings.setAll(scoreboardEngine.getStrings());
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
+        });
     }
 }
-
