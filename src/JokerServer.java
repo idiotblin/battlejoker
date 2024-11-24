@@ -69,12 +69,13 @@ public class JokerServer {
                         if (!gameStarted) {
                             lobbySize++;
                             connected.add(true);
-                            sendInGame(clientSocket, true);
+                            sendInGame(clientSocket, lobbySize < 4);
                         } else {
                             sendInGame(clientSocket, false);
                         }
                         if (lobbySize == 4) { // start the game automatically
                             gameStarted = true;
+                            gameTurn = 0;
                         }
                     }
                 } else {
@@ -98,8 +99,8 @@ public class JokerServer {
                             if (ind < connected.size()) {
                                 synchronized (connected) {
                                     connected.remove(ind);
+                                    lobbySize--;
                                 }
-                                lobbySize--;
                             }
                             synchronized (clientList) {
                                 clientList.remove(clientSocket);
@@ -151,11 +152,13 @@ public class JokerServer {
         }
 
         while (true) {
+            System.out.println("Lobbysize: " + lobbySize);
+            System.out.println("turn: " + gameTurn);
             if (gameOver) {
                 try {
                     sendGameOver();
                     gameStarted = false;
-                    gameTurn = 0;
+                    gameTurn = -1;
                     curMoveCount = 0;
                     gameOver = false;
                     if (lobbySize > 0) {
@@ -165,12 +168,10 @@ public class JokerServer {
                     lobbySize = Math.min(4, clientList.size());
                     if (lobbySize == 4) {
                         gameStarted = true;
+                        gameTurn = 0;
                     }
-                    for (int i = 0; i < lobbySize; i++) {
-                        sendInGame(clientList.get(i), true);
-                    }
-                    for (int i = lobbySize; i < clientList.size(); i++) {
-                        sendInGame(clientList.get(i), false);
+                    for (int i = 0; i < clientList.size(); i++) {
+                        sendInGame(clientList.get(i), i < lobbySize);
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();

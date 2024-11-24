@@ -75,10 +75,11 @@ public class GameWindow {
     final Image[] images = new Image[symbols.length];
     static GameEngine gameEngine;
 
-    public GameWindow(Stage stage, String ip, String port, String background) throws IOException {
+    public GameWindow(Stage stage, String ip, String port, String background, String playerName) throws IOException {
         setBgName(background);
         loadImages();
         gameEngine = GameEngine.getInstance(ip, port);
+        gameEngine.sendPlayerName(playerName);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainUI.fxml"));
         loader.setController(this);
         Parent root = loader.load();

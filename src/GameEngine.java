@@ -146,6 +146,14 @@ public class GameEngine {
         out.writeInt(name.length());
         out.write(name.getBytes());
         out.flush();
+        char data = (char) in.read();
+        System.out.println(data);
+        if (data == 'I') {
+            this.isInGame = in.readBoolean();
+            if (!this.isInGame) {
+                this.posInQueue = in.readInt();
+            }
+        }
     }
 
     /**
