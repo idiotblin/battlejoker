@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="996.0" prefWidth="1058.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="-Infinity" minHeight="-Infinity" prefHeight="1107.0" prefWidth="1058.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
         <Menu mnemonicParsing="false" text="Game">
         </Menu>
@@ -28,7 +28,7 @@
     <Label fx:id="waiting" text="You are watching the current game." />
     <Label fx:id="queueLabel" />
     <Button fx:id="leave" text="Leave" />
-    <BorderPane fx:id="boardPane">
+    <BorderPane fx:id="boardPane" VBox.vgrow="ALWAYS">
         <center>
             <Pane style="-fx-background-color: #a88;" BorderPane.alignment="CENTER">
                 <Canvas fx:id="canvas" />

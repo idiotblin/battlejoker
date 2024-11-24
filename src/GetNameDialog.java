@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -20,6 +21,10 @@ public class GetNameDialog {
     @FXML
     TextField portField;
 
+
+    @FXML
+    ComboBox<String> backgroundSelector;
+
     @FXML
     Button goButton;
 
@@ -27,6 +32,7 @@ public class GetNameDialog {
     String playername;
     String ip;
     String port;
+    String selectedBackground;
 
     public GetNameDialog() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("getNameUI.fxml"));
@@ -40,6 +46,9 @@ public class GetNameDialog {
         stage.setMinWidth(scene.getWidth());
         stage.setMinHeight(scene.getHeight());
 
+        backgroundSelector.getItems().addAll("bg", "bg1", "bg2");
+        backgroundSelector.setValue("bg");
+
         goButton.setOnMouseClicked(this::OnButtonClick);
 
         stage.showAndWait();
@@ -50,6 +59,8 @@ public class GetNameDialog {
         playername = nameField.getText().trim();
         ip = ipField.getText().trim();
         port = portField.getText().trim();
+
+        selectedBackground = backgroundSelector.getValue();
 
         // add ip and port
         if (!playername.isEmpty() && !ip.isEmpty() && !port.isEmpty()) // AND ip !isEmpty AND port !isEmpty
@@ -66,5 +77,9 @@ public class GetNameDialog {
 
     public String getPort() {
         return port;
+    }
+
+    public String getSelectedBackground() {
+        return selectedBackground;
     }
 }

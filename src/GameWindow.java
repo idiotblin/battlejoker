@@ -60,11 +60,14 @@ public class GameWindow {
     AnimationTimer animationTimer;
 
     final String imagePath = "images/";
+    final String bgImagePath = "backgrounds/";
+    String bgName = "bg";
     final String[] symbols = {"bg", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "Joker"};
     final Image[] images = new Image[symbols.length];
     static GameEngine gameEngine;
 
-    public GameWindow(Stage stage, String ip, String port) throws IOException {
+    public GameWindow(Stage stage, String ip, String port, String background) throws IOException {
+        setBgName(background);
         loadImages();
         gameEngine = GameEngine.getInstance(ip, port);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainUI.fxml"));
@@ -127,6 +130,12 @@ public class GameWindow {
     private void loadImages() throws IOException {
         for (int i = 0; i < symbols.length; i++)
             images[i] = new Image(Files.newInputStream(Paths.get(imagePath + symbols[i] + ".png")));
+
+        // set background if selected different from default
+        if (!bgName.equals("bg")) {
+            System.out.println("BG SELECTED!!!");
+            images[0] = new Image(Files.newInputStream(Paths.get(bgImagePath + bgName + ".png")));
+        }
     }
 
     private void initCanvas() {
@@ -143,6 +152,8 @@ public class GameWindow {
         animationTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
+                onWidthChangedWindow(stage.getWidth());
+                onHeightChangedWindow(stage.getHeight());
                 render();
                 if (gameEngine.isGameOver()) {
                     System.out.println("Game Over!");
@@ -258,5 +269,9 @@ public class GameWindow {
 
     public void setName(String name) throws IOException {
         gameEngine.sendPlayerName(name);
+    }
+
+    public void setBgName(String bgName) {
+        this.bgName = bgName;
     }
 }
