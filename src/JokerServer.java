@@ -161,8 +161,6 @@ public class JokerServer {
         }
 
         while (true) {
-            System.out.println("Lobbysize: " + lobbySize);
-            System.out.println("turn: " + gameTurn);
             if (gameOver) {
                 try {
                     sendGameOver();
@@ -177,24 +175,17 @@ public class JokerServer {
                     if (lobbySize > 0) {
                         clientList.subList(0, lobbySize).clear();
                         playerList.subList(0, lobbySize).clear();
-                        System.out.println("clientlist size: " + clientList.size());
-                        System.out.println("playerlist size: " + playerList.size());
                     }
                     lobbySize = Math.min(4, clientList.size());
-                    System.out.println("lobby: " + lobbySize);
+
                     //reset board
                     Arrays.fill(board, 0);
                     board[random.nextInt(SIZE * SIZE)] = 1;
-                    for (int i = 0; i < 16; i++) {
-                        System.out.print(board[i] + " ");
-                    }
-                    System.out.println();
+
                     if (lobbySize == 4) {
                         gameStarted = true;
                         gameTurn = 0;
                     }
-                    System.out.println("started: " + gameStarted);
-                    System.out.println("turn: " + gameTurn);
                     synchronized (clientList) {
                         for (int i = 0; i < clientList.size(); i++) {
                             DataOutputStream _out = new DataOutputStream(clientList.get(i).getOutputStream());
