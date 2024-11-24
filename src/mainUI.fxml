@@ -18,6 +18,12 @@
         <Menu mnemonicParsing="false" text="Help">
             <MenuItem fx:id="mnuAbout" mnemonicParsing="false" text="About..." />
         </Menu>
+        <Menu mnemonicParsing="false" fx:id="downloadButton" text="Download">
+            <MenuItem text="Download Puzzle" onAction="#downloadPuzzle"/>
+        </Menu>
+        <Menu mnemonicParsing="false" fx:id="uploadButton" text="Upload">
+            <MenuItem text="Upload Puzzle" onAction="#uploadPuzzle"/>
+        </Menu>
     </MenuBar>
     <HBox style="-fx-background-color: #a88;">
         <VBox fx:id="playerStats" alignment="CENTER" spacing="10">

@@ -10,16 +10,19 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -53,6 +56,12 @@ public class GameWindow {
 
     @FXML
     Button leave;
+
+    @FXML
+    Menu downloadButton;
+
+    @FXML
+    Menu uploadButton;
 
     Stage stage;
     Stage waitOrLeaveStage;
@@ -108,6 +117,49 @@ public class GameWindow {
             waitButton.setOnMouseClicked(this::waitButtonClicked);
             leaveButton.setOnMouseClicked(this::leaveButtonClicked);
             waitOrLeaveStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void downloadPuzzle() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Puzzle");
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            savePuzzleToFile(file);
+        }
+    }
+
+    private void savePuzzleToFile(File file) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            for (int i: gameEngine.board) {
+                writer.write(i + " ");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void uploadPuzzle() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Upload Puzzle");
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            uploadPuzzleToServer(file);
+        }
+    }
+
+    private void uploadPuzzleToServer(File file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            StringBuilder puzzle = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                puzzle.append(line);
+            }
+            gameEngine.uploadPuzzle(puzzle.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -178,18 +230,18 @@ public class GameWindow {
 
         HBox playerHBox = new HBox(10); // Create an HBox to contain player VBoxes
         for (int i = 0; i < numberOfPlayers; i++) {
-            Label nameLabel = new Label(gameEngine.playerList.get(i).getName());
-            nameLabel.setFont(Font.font("Impact", 30));
+            synchronized (gameEngine.playerList) {
+                Label nameLabel = new Label(gameEngine.playerList.get(i).getName());
+                nameLabel.setFont(Font.font("Impact", 30));
+                Label scoreLabel = new Label("Score: " + gameEngine.playerList.get(i).getScore());
+                Label levelLabel = new Label("Level: " + gameEngine.playerList.get(i).getLevel());
+                Label comboLabel = new Label("Combo: " + gameEngine.playerList.get(i).getCombo());
+                Label moveCountLabel = new Label("# of Moves: " + gameEngine.getMoveCount());
+                VBox playerVBox = new VBox(5); // Create a VBox for each player
+                playerVBox.getChildren().addAll(nameLabel, scoreLabel, levelLabel, comboLabel, moveCountLabel);
 
-            Label scoreLabel = new Label("Score: " + gameEngine.playerList.get(i).getScore());
-            Label levelLabel = new Label("Level: " + gameEngine.playerList.get(i).getLevel());
-            Label comboLabel = new Label("Combo: " + gameEngine.playerList.get(i).getCombo());
-            Label moveCountLabel = new Label("# of Moves: " + gameEngine.getMoveCount());
-
-            VBox playerVBox = new VBox(5); // Create a VBox for each player
-            playerVBox.getChildren().addAll(nameLabel, scoreLabel, levelLabel, comboLabel, moveCountLabel);
-
-            playerHBox.getChildren().add(playerVBox); // Add player's VBox to the HBox
+                playerHBox.getChildren().add(playerVBox); // Add player's VBox to the HBox
+            }
         }
         playerStats.getChildren().add(playerHBox); // Add the HBox to the main VBox
 
@@ -205,10 +257,12 @@ public class GameWindow {
             waiting.setVisible(true);
             queueLabel.setText("Your position in the queue: " + pos);
             queueLabel.setVisible(true);
+            uploadButton.setVisible(false);
         } else {
             waiting.setVisible(false);
             queueLabel.setVisible(false);
             leave.setVisible(false);
+            uploadButton.setVisible(true);
         }
     }
 

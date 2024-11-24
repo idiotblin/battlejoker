@@ -29,10 +29,6 @@ public class GameEngine {
         in = new DataInputStream(clientSocket.getInputStream());
         out = new DataOutputStream(clientSocket.getOutputStream());
 
-//        Player curPlayer = new Player(InetAddress.getLocalHost().getHostAddress());
-//        // if playerList.size() < 4: ... else do not allow
-//        playerList.add(curPlayer);
-
         receiverThread = new Thread(()->{
             try {
                 while (true) {
@@ -53,7 +49,7 @@ public class GameEngine {
                         case 'T':
                             this.turn = in.readInt();
                             break;
-                        case 'N':
+                        case 'I':
                             this.isInGame = in.readBoolean();
                             if (!this.isInGame) {
                                 this.posInQueue = in.readInt();
@@ -83,25 +79,22 @@ public class GameEngine {
     }
 
     private void receivePlayerStats(DataInputStream in) throws IOException {
-        int numOfPlayers = in.readInt(); // check players, if exists update, if absent add
-        for (int i = 0; i < numOfPlayers; i++) {
-            int ipLength = in.readInt();
-            byte[] ipBytes = new byte[ipLength];
-            in.read(ipBytes, 0, ipLength);
-            String ipAddress = new String(ipBytes);
-
-            updatePlayerList(in, ipAddress);
+        synchronized (playerList) {
+            playerList.clear();
+            int numOfPlayers = in.readInt(); // check players, if exists update, if absent add
+            for (int i = 0; i < numOfPlayers; i++) {
+                updatePlayerList(in);
+            }
         }
     }
 
-    private void updatePlayerList(DataInputStream in, String ipAddress) throws IOException {
-        Player player = new Player(ipAddress);
+    private void updatePlayerList(DataInputStream in) throws IOException {
+        Player player = new Player();
 
         int nameLength = in.readInt();
         byte[] nameBytes = new byte[nameLength];
         in.read(nameBytes, 0, nameLength);
         player.setName(new String(nameBytes));
-
         int tempLevel = in.readInt();
         player.setLevel(tempLevel);
 
@@ -113,11 +106,7 @@ public class GameEngine {
 
         totalMoveCount = in.readInt();
 
-        if (playerList.isEmpty() || (!playerListContains(ipAddress))) {
-            playerList.add(player);
-        } else {
-            playerList.set(getPlayerIndex(ipAddress), player);
-        }
+        playerList.add(player);
     }
 
     private int getPlayerIndex(String ipAddress) {
@@ -131,14 +120,6 @@ public class GameEngine {
             index++;
         }
         return index;
-    }
-
-    private boolean playerListContains(String ipAddress) {
-        for (Player p : playerList)
-            if (p.getIpAddress().equals(ipAddress))
-                return true;
-
-        return false;
     }
 
     public void receiveArray(DataInputStream in) throws IOException {
@@ -164,6 +145,7 @@ public class GameEngine {
         out.write('N');
         out.writeInt(name.length());
         out.write(name.getBytes());
+        out.flush();
     }
 
     /**
@@ -202,7 +184,9 @@ public class GameEngine {
     public String getTurnName() {
         if (turn == -1)
             return null;
-        return playerList.get(turn).getName();
+        synchronized (playerList) {
+            return playerList.get(turn).getName();
+        }
     }
 
     public boolean isInGame() {
@@ -211,5 +195,12 @@ public class GameEngine {
 
     public int getPosInQueue() {
         return posInQueue;
+    }
+
+    public void uploadPuzzle(String puzzle) throws IOException {
+        out.write('P');
+        out.writeInt(puzzle.length());
+        out.write(puzzle.getBytes());
+        out.flush();
     }
 }
