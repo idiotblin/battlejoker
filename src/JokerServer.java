@@ -301,6 +301,8 @@ public class JokerServer {
         byte[] puzzleBytes = new byte[len];
         in.read(puzzleBytes, 0, len);
         String[] puzzle = (new String(puzzleBytes)).split(" ");
+        if (gameStarted)
+            return;
         for (int i = 0; i < SIZE * SIZE; i++) {
             board[i] = Integer.parseInt(puzzle[i]);
         }
