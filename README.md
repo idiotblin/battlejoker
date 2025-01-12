@@ -1,6 +1,6 @@
 # BattleJoker
 
-This is a multiplayer parody on the classic game **2048**. The game supports a single lobby with up to 4 concurrent players, who compete to achieve the highest score. After each game, results are stored, and players can the results of their game, as well as view the top 10 historical scores.
+This is a multiplayer parody on the classic game **2048**. The game supports a single lobby with up to 4 concurrent players, who compete to achieve the highest score. After each game, results are stored, and players can see the results of their game, as well as the top 10 historical scores.
 
 ## Gameplay Instructions:
 
