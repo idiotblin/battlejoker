@@ -2,6 +2,12 @@
 
 This is a multiplayer parody on the classic game **2048**. The game supports a single lobby with up to 4 concurrent players, who compete to achieve the highest score. After each game, results are stored, and players can see the results of their game, as well as the top 10 historical scores.
 
+# Join the Game
+
+- Ensure the server (file JokerServer.java) is running
+- Run the client program (file BattleJoker.java)
+- Input your username, IP address of the server and port
+
 ## Gameplay Instructions:
 
 - Use arrow keys to move the cards on the board, similar to the original 2048 game.
@@ -36,7 +42,7 @@ This is a multiplayer parody on the classic game **2048**. The game supports a s
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/aswaddd/battleJoker.git
+    git clone https://github.com/idiotblin/battlejoker.git
     ```
 2. Navigate to the project directory:
     ```bash
@@ -47,7 +53,7 @@ This is a multiplayer parody on the classic game **2048**. The game supports a s
 
 Start the game by running:
 
-JokerServer & BattleJoker classes.
+JokerServer (server-side) & BattleJoker (client-side) classes.
 
 ## For Multicast Scoreboard
 
