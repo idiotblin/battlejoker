@@ -1,8 +1,20 @@
 # BattleJoker
 
-BattleJoker game made multiplayer. Supports a single lobby of 4 concurrent players.
+This is a multiplayer parody on the classic game **2048**. The game supports a single lobby with up to 4 concurrent players, who compete to achieve the highest score. After each game, results are stored, and players can the results of their game, as well as view the top 10 historical scores.
 
-## Extra Features
+## Gameplay Instructions:
+
+- Use arrow keys to move the cards on the board, similar to the original 2048 game.
+- Each player has 4 moves per turn.
+- The game ends when there are no legal moves left.
+
+## Lobby and Queue System:
+
+- When the first player joins, they can wait for other players to join or start the game whenever they want.
+- When the 4th player joins, the game starts automatically.
+- Players who join while a game is in progress are added to a queue and will join the next game as soon as the current one ends.
+
+## Features
 
 - **Background Selector**
 
