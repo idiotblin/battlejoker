@@ -5,7 +5,8 @@ BattleJoker game made multiplayer. Supports a single lobby of 4 concurrent playe
 ## Extra Features
 
 - **Background Selector**
-    Choose from 3 different backgrounsd.
+
+  Choose from 3 different backgrounsd.
   
 - **Spectator Mode**
     If a 5th player join when the lobby is live, they can choose to wait and spectate the live game or leave.
