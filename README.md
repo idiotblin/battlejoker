@@ -9,13 +9,16 @@ BattleJoker game made multiplayer. Supports a single lobby of 4 concurrent playe
   Choose from 3 different backgrounsd.
   
 - **Spectator Mode**
-    If a 5th player join when the lobby is live, they can choose to wait and spectate the live game or leave.
+
+  If a 5th player join when the lobby is live, they can choose to wait and spectate the live game or leave.
   
 - **Upload and Download Puzzle**
-    PLayers can save the current state of the puzzle and start a new game with that puzzle
 
-  - **Multicast Scoreboard**
-    An individual program, to be run on client side. Shows the latest updated scores of the top 10 historical games.
+  PLayers can save the current state of the board (puzzle) and upload custom puzzle before starting a new game 
+
+- **Multicast Scoreboard**
+
+  An individual program, to be run on client side. Shows the latest updated scores of the top 10 historical games.
   
 ## Installation
 
